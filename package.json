@@ -1,0 +1,8 @@
+{
+  "name": "ai-recognition-root",
+  "private": true,
+  "scripts": {
+    "build": "cd client && npm install && npm run build",
+    "install-all": "npm install && cd client && npm install && cd ../server && npm install"
+  }
+}
