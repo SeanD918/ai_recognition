@@ -4,7 +4,7 @@ import { Upload, Loader2, Sparkles, AlertCircle, RefreshCw } from 'lucide-react'
 import './App.css';
 
 // Using jsdelivr to access the model weights directly from the @vladmandic/face-api package
-const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
+const MODEL_URL = import.meta.env.VITE_MODEL_URL || 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
 
 function App() {
   const [isModelLoaded, setIsModelLoaded] = useState(false);
