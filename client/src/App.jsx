@@ -1,50 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
-import * as faceapi from '@vladmandic/face-api';
-import { Upload, Loader2, Sparkles, AlertCircle, RefreshCw } from 'lucide-react';
+import { Upload, Loader2, Sparkles, AlertCircle, RefreshCw, Cpu } from 'lucide-react';
 import './App.css';
 
-// Using jsdelivr to access the model weights directly from the @vladmandic/face-api package
-const MODEL_URL = import.meta.env.VITE_MODEL_URL || 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
-
 function App() {
-  const [isModelLoaded, setIsModelLoaded] = useState(false);
-  const [modelError, setModelError] = useState('');
   const [imageSrc, setImageSrc] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [results, setResults] = useState(null);
   
   const imageRef = useRef();
 
-  useEffect(() => {
-    const loadModels = async () => {
-      try {
-        console.log('Loading AI models from:', MODEL_URL);
-        
-        // Ensure a valid target backend is initialized before loading models.
-        // It tries WebGL first, then strictly falls back to CPU to prevent WASM file loading errors.
-        try {
-          await faceapi.tf.setBackend('webgl');
-          await faceapi.tf.ready();
-        } catch (e) {
-          console.warn('WebGL is not supported. Falling back to CPU processing...');
-          await faceapi.tf.setBackend('cpu');
-          await faceapi.tf.ready();
-        }
-
-        await Promise.all([
-          faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-          faceapi.nets.ageGenderNet.loadFromUri(MODEL_URL)
-        ]);
-        console.log('Models loaded successfully');
-        setIsModelLoaded(true);
-      } catch (err) {
-        console.error('Error loading AI models:', err);
-        setModelError('Failed to load Neural Networks. Please check your internet connection or ad-blocker.');
-      }
-    };
-    loadModels();
-  }, []);
-
+  // Handle uploading the image from device
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -57,34 +22,27 @@ function App() {
     }
   };
 
+  // Called when the image successfully renders on screen
   const handleImageLoad = async () => {
-    if (!isModelLoaded) return;
     setIsAnalyzing(true);
     setResults(null);
     
     try {
       const img = imageRef.current;
       
-      // We use tinyFaceDetector for faster processing
-      const detections = await faceapi.detectSingleFace(img, new faceapi.TinyFaceDetectorOptions())
-                                      .withAgeAndGender();
+      // TODO: Add your Custom AI Model logic here!
+      // Example: const predictions = await myCustomModel.predict(img);
       
-      if (detections) {
-        // Add a slight delay to make the scanning animation visible (looks cooler!)
-        setTimeout(() => {
-          setResults({
-            gender: detections.gender, // 'male' or 'female'
-            genderProbability: detections.genderProbability,
-            age: detections.age
-          });
-          setIsAnalyzing(false);
-        }, 1500);
-      } else {
-        setTimeout(() => {
-          setResults({ error: 'No face detected. Please ensure a face is clearly visible.' });
-          setIsAnalyzing(false);
-        }, 1000);
-      }
+      // Simulating a scanning delay for effect before showing results
+      setTimeout(() => {
+        setResults({
+          message: 'Ready for Custom AI Model! Replace this block in App.jsx with your TensorFlow.js logic.',
+          // gender: 'female',
+          // age: 24
+        });
+        setIsAnalyzing(false);
+      }, 1500);
+
     } catch (err) {
       console.error(err);
       setResults({ error: 'An error occurred during facial analysis.' });
@@ -105,21 +63,7 @@ function App() {
         <p>Advanced AI Gender Classification</p>
       </header>
 
-      {!isModelLoaded && !modelError && (
-        <div className="loading-state">
-          <Loader2 className="spinner" size={48} />
-          <p>Initializing Neural Networks...</p>
-        </div>
-      )}
-
-      {modelError && (
-        <div className="error-state">
-          <AlertCircle size={48} />
-          <p>{modelError}</p>
-        </div>
-      )}
-
-      {isModelLoaded && !imageSrc && (
+      {!imageSrc && (
         <div className="upload-container">
           <input
             type="file"
@@ -150,7 +94,7 @@ function App() {
              {isAnalyzing && (
                <div className="scanning-overlay">
                  <div className="scanner-line"></div>
-                 <p>Analyzing facial features...</p>
+                 <p>Scanning in progress...</p>
                </div>
              )}
           </div>
@@ -165,20 +109,12 @@ function App() {
               ) : (
                 <>
                   <div className="result-main">
-                    <span className="label">AI Prediction</span>
-                    <h2 className={`gender ${results.gender}`}>
-                       {results.gender === 'male' ? 'Male' : 'Female'}
+                    <span className="label">System Status</span>
+                    <h2 className="gender" style={{fontSize: '1.2rem', margin: '15px 0', color: '#f8fafc', textShadow: 'none', background: 'none', webkitTextFillColor: 'initial'}}>
+                       <Cpu size={24} style={{ marginRight: '8px', verticalAlign: 'middle', color: '#6366f1' }}/>
+                       Awaiting Custom Code
                     </h2>
-                  </div>
-                  <div className="result-stats">
-                    <div className="stat-box">
-                      <span className="stat-label">Confidence</span>
-                      <span className="stat-value">{(results.genderProbability * 100).toFixed(1)}%</span>
-                    </div>
-                    <div className="stat-box">
-                      <span className="stat-label">Est. Age</span>
-                      <span className="stat-value">{Math.round(results.age)}</span>
-                    </div>
+                    <p style={{fontSize: '0.9rem', color: '#94a3b8', lineHeight: '1.5'}}>{results.message}</p>
                   </div>
                 </>
               )}
