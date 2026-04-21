@@ -18,10 +18,32 @@ function App() {
     const loadCustomModel = async () => {
       try {
         console.log('Loading Custom CelebA Neural Network...');
-        // Relative path is safest for both Local and Vercel
-        const model = await tf.loadLayersModel('./models/model.json');
+        
+        // 1. Fetch the model JSON manually first
+        const response = await fetch('./models/model.json');
+        const modelJson = await response.json();
+
+        // 2. PATCH: Keras 3 compatibility fix for TFJS
+        // It converts 'batch_shape' (Keras 3) to 'batch_input_shape' (TFJS expected)
+        if (modelJson.modelTopology?.model_config?.config?.layers?.[0]?.config) {
+          const config = modelJson.modelTopology.model_config.config.layers[0].config;
+          if (config.batch_shape && !config.batch_input_shape) {
+            config.batch_input_shape = config.batch_shape;
+          }
+        }
+
+        // 3. Load the model from the modified JSON
+        // We use a custom fetcher to ensure it finds the .bin files in the same spot
+        const model = await tf.loadLayersModel(tf.io.fromMemory(
+          modelJson.modelTopology,
+          modelJson.format,
+          modelJson.generatedBy,
+          modelJson.weightsManifest,
+          (path) => fetch(`./models/${path}`) 
+        ));
+
         modelRef.current = model;
-        console.log('Custom Model Ready!');
+        console.log('Custom Model Ready and Patched!');
         setIsModelLoaded(true);
       } catch (err) {
         console.error('Error loading custom model:', err);
