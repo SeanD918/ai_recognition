@@ -18,8 +18,9 @@ function App() {
     const loadCustomModel = async () => {
       try {
         console.log('Loading Custom CelebA Neural Network...');
-        // This looks into your public/models folder
-        const model = await tf.loadLayersModel('/models/model.json');
+        // Standard Vite way to reference the public folder
+        const modelPath = `${window.location.origin}/models/model.json`;
+        const model = await tf.loadLayersModel(modelPath);
         modelRef.current = model;
         console.log('Custom Model Ready!');
         setIsModelLoaded(true);
