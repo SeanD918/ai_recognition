@@ -9,7 +9,7 @@ function App() {
   const [imageSrc, setImageSrc] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [results, setResults] = useState(null);
-  
+
   const imageRef = useRef();
   const modelRef = useRef();
 
@@ -18,7 +18,7 @@ function App() {
     const loadCustomModel = async () => {
       try {
         console.log('Loading Custom CelebA Neural Network...');
-        
+
         // Standard load since we fixed the file on disk!
         const model = await tf.loadLayersModel('./models/model.json');
 
@@ -50,7 +50,7 @@ function App() {
     if (!isModelLoaded || !modelRef.current) return;
     setIsAnalyzing(true);
     setResults(null);
-    
+
     try {
       const img = imageRef.current;
       const model = modelRef.current;
@@ -59,13 +59,13 @@ function App() {
       const predictionData = tf.tidy(() => {
         // A. Convert image to math Tensors
         let tensor = tf.browser.fromPixels(img);
-        
+
         // B. Resize to 64x64 (Exactly what we used in Colab!)
         tensor = tf.image.resizeBilinear(tensor, [64, 64]);
-        
+
         // C. Normalize (0-255 to 0.0-1.0) and Expand Dims for the model
         tensor = tensor.div(255.0).expandDims(0);
-        
+
         // D. Predict!
         return model.predict(tensor);
       });
@@ -103,8 +103,8 @@ function App() {
     <div className="container">
       <header className="header">
         <BrainCircuit className="logo-icon" size={32} />
-        <h1>AuraSense Custom</h1>
-        <p>Private AI Gender Classification</p>
+        <h1>AuraSense</h1>
+        <p>Private AI Gender Recognition</p>
       </header>
 
       {!isModelLoaded && !modelError && (
@@ -122,7 +122,7 @@ function App() {
       )}
 
       {isModelLoaded && !imageSrc && (
-        <div className="upload-container" style={{animation: 'fadeIn 0.5s ease-out'}}>
+        <div className="upload-container" style={{ animation: 'fadeIn 0.5s ease-out' }}>
           <input
             type="file"
             id="file-upload"
@@ -133,7 +133,7 @@ function App() {
           <label htmlFor="file-upload" className="upload-label">
             <Upload size={48} className="upload-icon" />
             <span className="upload-text">Upload a Face</span>
-            <span className="upload-subtext">AI will use your CelebA Brain profile</span>
+            <span className="upload-subtext"> </span>
           </label>
         </div>
       )}
@@ -141,20 +141,20 @@ function App() {
       {imageSrc && (
         <div className="analysis-container">
           <div className="image-wrapper">
-             <img 
-               ref={imageRef} 
-               src={imageSrc} 
-               alt="Analysis Target" 
-               className="uploaded-image" 
-               onLoad={handleImageLoad}
-               crossOrigin="anonymous"
-             />
-             {isAnalyzing && (
-               <div className="scanning-overlay">
-                 <div className="scanner-line"></div>
-                 <p>Deploying Custom Neural Network...</p>
-               </div>
-             )}
+            <img
+              ref={imageRef}
+              src={imageSrc}
+              alt="Analysis Target"
+              className="uploaded-image"
+              onLoad={handleImageLoad}
+              crossOrigin="anonymous"
+            />
+            {isAnalyzing && (
+              <div className="scanning-overlay">
+                <div className="scanner-line"></div>
+                <p>Deploying Custom Neural Network...</p>
+              </div>
+            )}
           </div>
 
           {!isAnalyzing && results && (
@@ -169,12 +169,12 @@ function App() {
                   <div className="result-main">
                     <span className="label">Custom Recognition</span>
                     <h2 className={`gender ${results.gender}`}>
-                       {results.gender === 'male' ? 'Male' : 'Female'}
+                      {results.gender === 'male' ? 'Male' : 'Female'}
                     </h2>
-                    <p style={{fontSize: '0.8rem', color: '#94a3b8', marginTop: '10px'}}>{results.message}</p>
+                    <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '10px' }}>{results.message}</p>
                   </div>
                   <div className="result-stats">
-                    <div className="stat-box" style={{width: '100%', gridColumn: 'span 2'}}>
+                    <div className="stat-box" style={{ width: '100%', gridColumn: 'span 2' }}>
                       <span className="stat-label">Model Confidence</span>
                       <span className="stat-value">{results.confidence}%</span>
                     </div>
@@ -183,7 +183,7 @@ function App() {
               )}
             </div>
           )}
-          
+
           <button className="reset-button" onClick={reset}>
             <RefreshCw size={20} />
             <span>Try Another Photo</span>
