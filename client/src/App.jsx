@@ -17,9 +17,16 @@ function App() {
   useEffect(() => {
     const loadCustomModel = async () => {
       try {
-        console.log('Loading Custom CelebA Neural Network...');
+        console.log('Finalizing neural network setup...');
+        
+        await tf.ready();
+        try {
+          await tf.setBackend('webgl');
+        } catch (e) {
+          console.warn('WebGL setup failed, falling back to CPU.');
+          await tf.setBackend('cpu');
+        }
 
-        // Standard load since we fixed the file on disk!
         const model = await tf.loadLayersModel('./models/model.json');
 
         modelRef.current = model;
