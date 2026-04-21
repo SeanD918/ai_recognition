@@ -167,7 +167,7 @@ function App() {
               ) : (
                 <>
                   <div className="result-main">
-                    <span className="label">Custom Prediction</span>
+                    <span className="label">Custom Recognition</span>
                     <h2 className={`gender ${results.gender}`}>
                        {results.gender === 'male' ? 'Male' : 'Female'}
                     </h2>
