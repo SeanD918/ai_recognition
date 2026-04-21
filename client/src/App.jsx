@@ -26,7 +26,7 @@ function App() {
         setIsModelLoaded(true);
       } catch (err) {
         console.error('Error loading custom model:', err);
-        setModelError('Could not find your custom model files in /public/models/. Please ensure model.json and .bin files are there.');
+        setModelError(`Debug Error: ${err.message || String(err)}`);
       }
     };
     loadCustomModel();
