@@ -1,30 +1,27 @@
-# Use a stable Python image
-FROM python:3.9-slim-bookworm
+# Use the official PyTorch CPU image (Everything is already installed!)
+FROM bitnami/pytorch:2.0.1
 
 # Set working directory
+USER root
 WORKDIR /app
 
-# Install system dependencies for image processing and PyTorch
+# Install only the small web-related libraries
 RUN apt-get update && apt-get install -y \
     libgl1 \
     libglib2.0-0 \
-    libjpeg-dev \
-    zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy only requirements first to leverage Docker cache
+# Copy requirements
 COPY requirements.txt .
 
-# Install dependencies with a timeout and memory-efficient flags
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+# We only need to install FastAPI and Uvicorn now (Torch is already there!)
+RUN pip install --no-cache-dir fastapi uvicorn python-multipart pillow
 
-# Copy the rest of the app
+# Copy your AI code
 COPY . .
 
-# Environment variables
-ENV PYTHONUNBUFFERED=1
-ENV PORT=10000
+# Fix permissions for the bitnami image
+RUN chmod -R 777 /app
 
 # Expose port
 EXPOSE 10000
