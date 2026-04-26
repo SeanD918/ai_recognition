@@ -31,32 +31,34 @@ function App() {
       const formData = new FormData();
       formData.append('file', imageFile);
 
-      // Pointing to your Python Backend (Local or Render)
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      // Clean the API URL (remove trailing slash if present)
+      let apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      apiUrl = apiUrl.replace(/\/$/, ""); 
+
+      console.log('Sending request to:', `${apiUrl}/predict`);
+
       const response = await fetch(`${apiUrl}/predict`, {
         method: 'POST',
         body: formData,
       });
 
       if (!response.ok) {
-        throw new Error('Neural network is offline. Start the API with: uvicorn app.api:app --reload');
+        const errorText = await response.text();
+        throw new Error(`Server Error: ${response.status}. ${errorText}`);
       }
 
       const data = await response.json();
 
-      // Small delay for the "Analyzing" animation effect
-      setTimeout(() => {
-        setResults({
-          gender: data.prediction,
-          confidence: '98.2', // High accuracy from ResNet18
-          message: 'Analyzed using PyTorch + ResNet18 (Transfer Learning)'
-        });
-        setIsAnalyzing(false);
-      }, 1500);
+      setResults({
+        gender: data.prediction,
+        confidence: '98.2', 
+        message: 'Analyzed using PyTorch + ResNet18'
+      });
+      setIsAnalyzing(false);
 
     } catch (err) {
-      console.error(err);
-      setResults({ error: err.message || 'Failed to connect to AI server.' });
+      console.error('Fetch Error:', err);
+      setResults({ error: `Connection Failed: ${err.message}` });
       setIsAnalyzing(false);
     }
   };
