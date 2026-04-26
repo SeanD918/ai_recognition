@@ -22,22 +22,38 @@ function App() {
   };
 
   // 2. The AI Prediction Logic (Calling FastAPI)
-  const performAnalysis = async () => {
-    if (!imageFile) return;
+  const performAnalysis = async (imageFile) => {
     setIsAnalyzing(true);
     setResults(null);
 
     try {
+      // 1. Resize Image on Client (Better for Render Free Tier)
+      const resizedImage = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(imageFile);
+        reader.onload = (e) => {
+          const img = new Image();
+          img.src = e.target.result;
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = 224;
+            canvas.height = 224;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, 224, 224);
+            canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.8);
+          };
+        };
+      });
+
       const formData = new FormData();
-      formData.append('file', imageFile);
+      formData.append('file', resizedImage, 'input.jpg');
 
       // Clean the API URL
       let apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
       apiUrl = apiUrl.replace(/\/$/, ""); 
 
-      // Create a timeout (wait for 45 seconds for cold starts)
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 45000);
+      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s for cold starts
 
       const response = await fetch(`${apiUrl}/predict`, {
         method: 'POST',
@@ -62,10 +78,10 @@ function App() {
       setIsAnalyzing(false);
 
     } catch (err) {
-      console.error('Fetch Error:', err);
+      console.error('Analysis Error:', err);
       const message = err.name === 'AbortError' 
-        ? 'Server is taking too long to wake up. Please try again in 10 seconds!'
-        : `Connection Failed: ${err.message}`;
+        ? 'AI is taking too long to wake up. Please try again in 20 seconds!'
+        : `Analysis Failed: ${err.message}`;
       
       setResults({ error: message });
       setIsAnalyzing(false);
@@ -111,7 +127,7 @@ function App() {
                 src={imageSrc}
                 alt="Analysis Target"
                 className="uploaded-image"
-                onLoad={performAnalysis}
+                onLoad={() => performAnalysis(imageFile)}
               />
               {isAnalyzing && (
                 <div className="scanning-overlay">
