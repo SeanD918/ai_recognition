@@ -131,7 +131,9 @@ function App() {
                     <div className="result-stats">
                       <div className="stat-box" style={{ width: '100%', gridColumn: 'span 2' }}>
                         <span className="stat-label">Model Confidence</span>
-                        <span className="stat-value">{results.confidence}%</span>
+                        <span className="stat-value">
+                          {results.confidence ? `${results.confidence}%` : 'Calculating...'}
+                        </span>
                       </div>
                     </div>
                   </>
