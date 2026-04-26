@@ -33,7 +33,7 @@ criterion = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
 # Training loop
-for epoch in range(5):
+for epoch in range(10):
     running_loss = 0.0
     for images, labels in train_loader:
         images, labels = images.to(device), labels.to(device)
