@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: gender-ai-backend
+    env: docker
+    region: oregon # or your preferred region
+    plan: free
+    rootDir: gender-ai
+    dockerContext: gender-ai
+    dockerfilePath: Dockerfile
+    healthCheckPath: /
+    envVars:
+      - key: PORT
+        value: 10000
