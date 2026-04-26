@@ -3,8 +3,11 @@ node_modules/
 dist/
 .env
 *.log
+
+# Python
 .venv/
+__pycache__/
+*.pyc
 gender-ai/data/
 gender-ai/temp/
-gender-ai/__pycache__/
-gender-ai/src/__pycache__/
+gender-ai/saved_models/*.pth
