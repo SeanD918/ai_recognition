@@ -20,6 +20,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+async def health_check():
+    return {"status": "AI Server is Online", "model": "ResNet18"}
+
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
     # Create temp directory
