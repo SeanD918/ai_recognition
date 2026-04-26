@@ -51,3 +51,4 @@ for epoch in range(5):
 
 torch.save(model.state_dict(), SAVE_PATH)
 print(f"Successfully saved model to {SAVE_PATH}")
+

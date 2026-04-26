@@ -4,8 +4,8 @@ import os
 from model import get_model
 from preprocess import transform
 
-# Initialize model
-model = get_model()
+# Initialize model without downloading base weights (we use our own .pth)
+model = get_model(pretrained=False)
 model_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "saved_models", "gender_model.pth")
 
 if os.path.exists(model_path):
