@@ -35,7 +35,11 @@ function App() {
       let apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
       apiUrl = apiUrl.replace(/\/$/, ""); 
 
-      console.log('Sending request to:', `${apiUrl}/predict`);
+      console.log('--- AI CONNECTION DEBUG ---');
+      console.log('Environment:', import.meta.env.MODE);
+      console.log('Target API URL:', apiUrl);
+      console.log('Full Endpoint:', `${apiUrl}/predict`);
+      console.log('---------------------------');
 
       const response = await fetch(`${apiUrl}/predict`, {
         method: 'POST',
