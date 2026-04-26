@@ -3,3 +3,8 @@ node_modules/
 dist/
 .env
 *.log
+.venv/
+gender-ai/data/
+gender-ai/temp/
+gender-ai/__pycache__/
+gender-ai/src/__pycache__/
