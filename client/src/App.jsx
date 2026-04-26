@@ -31,8 +31,9 @@ function App() {
       const formData = new FormData();
       formData.append('file', imageFile);
 
-      // Pointing to your new Python Backend
-      const response = await fetch('http://localhost:8000/predict', {
+      // Pointing to your Python Backend (Local or Render)
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${apiUrl}/predict`, {
         method: 'POST',
         body: formData,
       });
