@@ -1,26 +1,33 @@
-# Use an official Python runtime as a parent image
-FROM python:3.9-slim
+# Use a stable Python image
+FROM python:3.9-slim-bookworm
 
-# Set the working directory in the container
+# Set working directory
 WORKDIR /app
 
-# Install system dependencies for OpenCV and PyTorch
+# Install system dependencies for image processing and PyTorch
 RUN apt-get update && apt-get install -y \
-    libgl1-mesa-glx \
+    libgl1 \
     libglib2.0-0 \
+    libjpeg-dev \
+    zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy the requirements file into the container
+# Copy only requirements first to leverage Docker cache
 COPY requirements.txt .
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Install dependencies with a timeout and memory-efficient flags
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application code into the container
+# Copy the rest of the app
 COPY . .
 
-# Expose the port the app runs on
+# Environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PORT=10000
+
+# Expose port
 EXPOSE 10000
 
-# Command to run the application
+# Start command
 CMD ["uvicorn", "app.api:app", "--host", "0.0.0.0", "--port", "10000"]
