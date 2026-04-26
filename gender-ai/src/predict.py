@@ -24,6 +24,8 @@ def predict_image(image_path):
 
     with torch.no_grad():
         outputs = model(img)
-        _, predicted = torch.max(outputs, 1)
+        # Calculate probabilities using Softmax
+        probabilities = torch.nn.functional.softmax(outputs, dim=1)
+        confidence, predicted = torch.max(probabilities, 1)
 
-    return classes[predicted.item()]
+    return classes[predicted.item()], confidence.item()

@@ -51,7 +51,7 @@ function App() {
 
       setResults({
         gender: data.prediction,
-        confidence: '98.2', 
+        confidence: data.confidence, 
         message: 'Analyzed using PyTorch + ResNet18'
       });
       setIsAnalyzing(false);

@@ -37,13 +37,16 @@ async def predict(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
 
     try:
-        result = predict_image(path)
+        result, confidence = predict_image(path)
     finally:
         # Clean up
         if os.path.exists(path):
             os.remove(path)
 
-    return {"prediction": result}
+    return {
+        "prediction": result,
+        "confidence": round(confidence * 100, 2)
+    }
 
 if __name__ == "__main__":
     import uvicorn
