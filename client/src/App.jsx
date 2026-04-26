@@ -31,20 +31,21 @@ function App() {
       const formData = new FormData();
       formData.append('file', imageFile);
 
-      // Clean the API URL (remove trailing slash if present)
+      // Clean the API URL
       let apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
       apiUrl = apiUrl.replace(/\/$/, ""); 
 
-      console.log('--- AI CONNECTION DEBUG ---');
-      console.log('Environment:', import.meta.env.MODE);
-      console.log('Target API URL:', apiUrl);
-      console.log('Full Endpoint:', `${apiUrl}/predict`);
-      console.log('---------------------------');
+      // Create a timeout (wait for 45 seconds for cold starts)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 45000);
 
       const response = await fetch(`${apiUrl}/predict`, {
         method: 'POST',
         body: formData,
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -62,7 +63,11 @@ function App() {
 
     } catch (err) {
       console.error('Fetch Error:', err);
-      setResults({ error: `Connection Failed: ${err.message}` });
+      const message = err.name === 'AbortError' 
+        ? 'Server is taking too long to wake up. Please try again in 10 seconds!'
+        : `Connection Failed: ${err.message}`;
+      
+      setResults({ error: message });
       setIsAnalyzing(false);
     }
   };
