@@ -31,9 +31,11 @@ function App() {
           if (res.ok) setModelStatus({ gender: 'online', animal: 'online' });
         } else {
           // Check individual APIs
+          console.log(`Checking Gender API health at: ${GENDER_API}/`);
           const gRes = await fetch(`${GENDER_API}/`, { method: 'GET' });
           if (gRes.ok) setModelStatus(prev => ({ ...prev, gender: 'online' }));
           
+          console.log(`Checking Animal API health at: ${ANIMAL_API}/`);
           const aRes = await fetch(`${ANIMAL_API}/`, { method: 'GET' });
           if (aRes.ok) setModelStatus(prev => ({ ...prev, animal: 'online' }));
         }
@@ -116,6 +118,7 @@ function App() {
         abortControllerRef.current = controller;
         const timeoutId = setTimeout(() => controller.abort('timeout'), 90000);
 
+        console.log(`Sending prediction request to: ${apiUrl}/predict`);
         const response = await fetch(`${apiUrl}/predict`, {
           method: 'POST',
           body: formData,
