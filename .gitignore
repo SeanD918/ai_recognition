@@ -8,5 +8,10 @@ dist/
 .venv/
 __pycache__/
 *.pyc
-gender-ai/data/
-gender-ai/temp/
+# AI Models Data/Temp
+ai_models/*/data/
+ai_models/*/temp/
+ai_models/*/scratch/
+temp/
+saved_models/data/
+imagenet_classes.txt

@@ -1,0 +1,16 @@
+{
+  "name": "ai-recognition-suite",
+  "version": "1.0.0",
+  "description": "Unified AI Recognition Suite",
+  "scripts": {
+    "install-all": "npm install --prefix client && npm install --prefix server",
+    "client": "npm run dev --prefix client",
+    "server": "npm start --prefix server",
+    "gender-ai": "cd ai_models/gender-ai && python -m uvicorn app.api:app --host 0.0.0.0 --port 8000 --reload",
+    "animal-ai": "cd ai_models/animal-ai && python -m uvicorn app.api:app --host 0.0.0.0 --port 8001 --reload",
+    "dev": "npx concurrently \"npm run client\" \"npm run server\" \"npm run gender-ai\" \"npm run animal-ai\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
