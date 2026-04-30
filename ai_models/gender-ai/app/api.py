@@ -12,27 +12,29 @@ from predict import predict_image, load_model_if_needed
 
 app = FastAPI(title="Gender Recognition API")
 
-# Custom CORS + Private Network Access Middleware
+# 1. Official CORS Middleware (Standard Compliance)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins including Vercel
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# 2. Private Network Access (PNA) Header Injector
 @app.middleware("http")
-async def cors_and_pna_middleware(request, call_next):
-    origin = request.headers.get("Origin", "*")
-    
-    # Handle preflight (OPTIONS) requests
+async def add_pna_header(request, call_next):
+    # Handle preflight (OPTIONS)
     if request.method == "OPTIONS":
         response = Response()
-        response.headers["Access-Control-Allow-Origin"] = origin
-        response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS, PUT, DELETE"
-        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With"
-        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Allow-Origin"] = request.headers.get("Origin", "*")
         response.headers["Access-Control-Allow-Private-Network"] = "true"
-        response.headers["Access-Control-Max-Age"] = "86400"
+        response.headers["Access-Control-Allow-Methods"] = "*"
+        response.headers["Access-Control-Allow-Headers"] = "*"
         return response
-    
+        
     response = await call_next(request)
-    response.headers["Access-Control-Allow-Origin"] = origin
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS, PUT, DELETE"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With"
-    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Private-Network"] = "true"
     return response
 
 @app.get("/")
