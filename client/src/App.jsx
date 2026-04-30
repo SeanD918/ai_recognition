@@ -82,31 +82,9 @@ function App() {
     try {
       const isAnimalFallback = modelType === 'animal';
       
-      // 1. Resize Image on Client (Better for Render Free Tier)
-        const resizedImage = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onerror = () => reject(new Error("Failed to read image file"));
-          reader.readAsDataURL(imageFile);
-          reader.onload = (e) => {
-            const img = new Image();
-            img.onerror = () => reject(new Error("Failed to load image into memory"));
-            img.src = e.target.result;
-            img.onload = () => {
-              const canvas = document.createElement('canvas');
-              canvas.width = 224;
-              canvas.height = 224;
-              const ctx = canvas.getContext('2d');
-              ctx.drawImage(img, 0, 0, 224, 224);
-              canvas.toBlob((blob) => {
-                if (blob) resolve(blob);
-                else reject(new Error("Failed to create image blob"));
-              }, 'image/jpeg', 0.8);
-            };
-          };
-        });
-
-        const formData = new FormData();
-        formData.append('file', resizedImage, 'input.jpg');
+      // Send full-quality image to restore accuracy (matching local behavior)
+      const formData = new FormData();
+      formData.append('file', imageFile, imageFile.name || 'input.jpg');
 
         // Target URLs: Support independent endpoints for production
         const USE_GATEWAY = import.meta.env.VITE_USE_GATEWAY === 'true';
