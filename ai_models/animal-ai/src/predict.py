@@ -1,9 +1,12 @@
-import torch
-from PIL import Image
+# Memory Optimized Imports
 import os
 import json
 import cv2
 import numpy as np
+from PIL import Image
+# Heavy imports moved inside functions to save RAM on Render Free Tier
+torch = None
+tf = None
 from model import get_model
 from preprocess import predict_transform
 
@@ -27,12 +30,12 @@ if os.path.exists(CLASSES_PATH):
         print(f"Error loading classes.json: {e}")
 
 # Initialize Model variables
-device = "cuda" if torch.cuda.is_available() else "cpu"
+device = "cpu" # Default to CPU for Render
 model_type = None # 'pytorch' or 'keras'
 model = None
 
 def load_model_if_needed():
-    global model, model_type
+    global model, model_type, tf, torch, device
     if model is not None:
         return
 
@@ -43,24 +46,32 @@ def load_model_if_needed():
             model = tf.keras.models.load_model(MODEL_KERAS_PATH)
             model_type = 'keras'
             print(f"Loaded Keras animal model from {MODEL_KERAS_PATH}")
+            return
         except Exception as e:
             print(f"Error loading Keras model: {e}")
 
     # Priority 2: PyTorch Model (Newly trained)
     if not model and os.path.exists(MODEL_PTH_PATH):
         try:
+            import torch
+            from model import get_model
+            device = "cuda" if torch.cuda.is_available() else "cpu"
             model = get_model(num_classes=len(CLASSES), pretrained=False)
             model.load_state_dict(torch.load(MODEL_PTH_PATH, map_location=device))
             model.to(device)
             model.eval()
             model_type = 'pytorch'
             print(f"Loaded PyTorch animal model weights from {MODEL_PTH_PATH}")
+            return
         except Exception as e:
             print(f"Error loading PyTorch model weights: {e}")
 
     if not model:
         print(f"Warning: No model weights found at {MODEL_PTH_PATH} or {MODEL_KERAS_PATH}")
         # Fallback to random weights pytorch
+        import torch
+        from model import get_model
+        device = "cuda" if torch.cuda.is_available() else "cpu"
         model = get_model(num_classes=len(CLASSES), pretrained=False).to(device)
         model.eval()
         model_type = 'pytorch'
