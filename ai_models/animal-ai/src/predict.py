@@ -85,7 +85,7 @@ def predict_image(image_path):
             img = tf.keras.preprocessing.image.load_img(image_path, target_size=(224, 224))
             img_array = tf.keras.preprocessing.image.img_to_array(img)
             img_array = np.expand_dims(img_array, 0)
-            img_array = img_array / 255.0 # [0, 1] normalization
+            img_array = (img_array / 127.5) - 1.0 # [-1, 1] normalization (Standard for MobileNetV2)
             
             # Use model(..., training=False) instead of model.predict for thread-safety and speed
             predictions = model(img_array, training=False)
