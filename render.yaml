@@ -4,7 +4,7 @@ services:
     env: docker
     region: oregon
     plan: free
-    dockerContext: ai_models/gender-ai
+    dockerContext: .
     dockerfilePath: ai_models/gender-ai/Dockerfile
     healthCheckPath: /
     envVars:
@@ -16,7 +16,7 @@ services:
     env: docker
     region: oregon
     plan: free
-    dockerContext: ai_models/animal-ai
+    dockerContext: .
     dockerfilePath: ai_models/animal-ai/Dockerfile
     healthCheckPath: /
     envVars:
