@@ -5,8 +5,6 @@ services:
     region: oregon
     plan: free
     rootDir: ai_models/gender-ai
-    dockerContext: .
-    dockerfilePath: Dockerfile
     healthCheckPath: /
     envVars:
       - key: PORT
@@ -18,8 +16,6 @@ services:
     region: oregon
     plan: free
     rootDir: ai_models/animal-ai
-    dockerContext: .
-    dockerfilePath: Dockerfile
     healthCheckPath: /
     envVars:
       - key: PORT
