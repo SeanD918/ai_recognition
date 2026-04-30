@@ -82,9 +82,9 @@ function App() {
     try {
       const isAnimalFallback = modelType === 'animal';
       
-      // Send full-quality image to restore accuracy (matching local behavior)
-      const formData = new FormData();
-      formData.append('file', imageFile, imageFile.name || 'input.jpg');
+        // Send the original image for maximum accuracy
+        const formData = new FormData();
+        formData.append('file', imageFile, 'input.jpg');
 
         // Target URLs: Support independent endpoints for production
         const USE_GATEWAY = import.meta.env.VITE_USE_GATEWAY === 'true';
