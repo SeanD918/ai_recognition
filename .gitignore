@@ -2,16 +2,17 @@ node_modules/
 .DS_Store
 dist/
 .env
+.env.local
 *.log
 
 # Python
 .venv/
 __pycache__/
 *.pyc
-# AI Models Data/Temp
+
+# AI Model Data (Too large for GitHub)
 ai_models/*/data/
-ai_models/*/temp/
 ai_models/*/scratch/
+ai_models/*/temp/
 temp/
-saved_models/data/
 imagenet_classes.txt
