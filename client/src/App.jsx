@@ -207,13 +207,19 @@ function App() {
         </div>
 
         <div className="status-bar">
-          <div className={`status-item ${modelStatus.gender}`}>
-            <span className="dot"></span>
-            Gender AI: {modelStatus.gender.toUpperCase()}
+          <div className={`status-item ${modelStatus.gender === 'online' ? 'online' : 'offline'}`}>
+            <span className="status-dot"></span>
+            Gender AI: {modelStatus.gender === 'online' ? 'ONLINE' : 'OFFLINE'}
+            <small style={{ opacity: 0.5, marginLeft: '8px', fontSize: '0.7em' }}>
+              ({(import.meta.env.VITE_GENDER_API_URL || 'localhost').includes('render.com') ? 'Cloud' : 'Local'})
+            </small>
           </div>
-          <div className={`status-item ${modelStatus.animal}`}>
-            <span className="dot"></span>
-            Animal AI: {modelStatus.animal.toUpperCase()}
+          <div className={`status-item ${modelStatus.animal === 'online' ? 'online' : 'offline'}`}>
+            <span className="status-dot"></span>
+            Animal AI: {modelStatus.animal === 'online' ? 'ONLINE' : 'OFFLINE'}
+            <small style={{ opacity: 0.5, marginLeft: '8px', fontSize: '0.7em' }}>
+              ({(import.meta.env.VITE_ANIMAL_API_URL || 'localhost').includes('render.com') ? 'Cloud' : 'Local'})
+            </small>
           </div>
         </div>
       </header>
