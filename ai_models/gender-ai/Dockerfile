@@ -8,6 +8,8 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     libgl1 \
     libglib2.0-0 \
+    libsm6 \
+    libxext6 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install
@@ -21,4 +23,5 @@ COPY . .
 EXPOSE 10000
 
 # Start command (Since we are in rootDir 'gender-ai', app.api is correct)
-CMD ["uvicorn", "app.api:app", "--host", "0.0.0.0", "--port", "10000"]
+# Start command
+CMD ["sh", "-c", "uvicorn app.api:app --host 0.0.0.0 --port ${PORT:-10000}"]
