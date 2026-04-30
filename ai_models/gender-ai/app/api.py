@@ -1,7 +1,7 @@
 import os
 import sys
 import shutil
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 # Add src to python path robustly
@@ -12,20 +12,22 @@ from predict import predict_image
 
 app = FastAPI(title="Gender Recognition API")
 
-# Add CORS middleware to allow requests from your React frontend
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    expose_headers=["*"],
-)
-
+# Custom CORS + Private Network Access Middleware
 @app.middleware("http")
-async def add_pna_header(request, call_next):
+async def cors_and_pna_middleware(request, call_next):
+    # Handle preflight (OPTIONS) requests
+    if request.method == "OPTIONS":
+        response = Response()
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "*"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+        response.headers["Access-Control-Allow-Private-Network"] = "true"
+        return response
+    
     response = await call_next(request)
-    response.headers["Access-Control-Allow-Private-Network"] = "true"
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "*"
     return response
 
 @app.get("/")
