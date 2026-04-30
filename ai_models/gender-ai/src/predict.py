@@ -6,17 +6,27 @@ import numpy as np
 from model import get_model
 from preprocess import transform
 
-# Initialize model
-model = get_model(pretrained=False)
-model_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "saved_models", "gender_model.pth")
+# Global model variable
+model = None
+classes = ["female", "male"]
 
-if os.path.exists(model_path):
-    model.load_state_dict(torch.load(model_path, map_location="cpu"))
-    print("Loaded gender model weights.")
-else:
-    print("Warning: Gender model weights not found.")
-
-model.eval()
+def load_model_if_needed():
+    global model
+    if model is not None:
+        return model
+        
+    print("Initializing gender model...")
+    model = get_model(pretrained=False)
+    model_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "saved_models", "gender_model.pth")
+    
+    if os.path.exists(model_path):
+        model.load_state_dict(torch.load(model_path, map_location="cpu"))
+        print("Loaded gender model weights.")
+    else:
+        print("Warning: Gender model weights not found.")
+    
+    model.eval()
+    return model
 
 # Face detectors for human verification
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_alt2.xml')
@@ -55,11 +65,12 @@ def predict_image(image_path):
         
     # 2. Gender Prediction
     try:
+        current_model = load_model_if_needed()
         img = Image.open(image_path).convert("RGB")
         img = transform(img).unsqueeze(0)
 
         with torch.no_grad():
-            outputs = model(img)
+            outputs = current_model(img)
             probabilities = torch.nn.functional.softmax(outputs, dim=1)
             confidence, predicted = torch.max(probabilities, 1)
 

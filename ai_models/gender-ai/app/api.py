@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(os.path.join(BASE_DIR, "src"))
 
-from predict import predict_image
+from predict import predict_image, load_model_if_needed
 
 app = FastAPI(title="Gender Recognition API")
 
