@@ -41,6 +41,13 @@ function App() {
         }
       } catch (err) {
         console.warn('API Check Failed:', err);
+        const isProduction = window.location.hostname !== 'localhost';
+        const isConfiguredForLocal = GENDER_API.includes('localhost') || ANIMAL_API.includes('localhost');
+        
+        if (isProduction && isConfiguredForLocal) {
+          console.error('CRITICAL: You are on Vercel but your APIs are set to localhost! Update your Vercel Environment Variables to point to Render.');
+        }
+        
         setModelStatus({ gender: 'offline', animal: 'offline' });
       }
     }
