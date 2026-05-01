@@ -118,6 +118,11 @@ function App() {
         }
 
         const data = await response.json();
+        
+        if (data.raw_scores) {
+          console.log("--- Raw AI Scores ---");
+          console.table(data.raw_scores);
+        }
 
         if (data.prediction === 'Not a human') {
           setResults({ 

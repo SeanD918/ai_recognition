@@ -67,10 +67,10 @@ async def predict(file: UploadFile = File(...)):
         
         # Run synchronous prediction in a threadpool to avoid blocking
         from fastapi.concurrency import run_in_threadpool
-        result, confidence = await run_in_threadpool(predict_image, path)
+        prediction, confidence, raw_scores = await run_in_threadpool(predict_image, path)
     except Exception as e:
         print(f"API Prediction Error: {e}")
-        result, confidence = "Error in prediction", 0.0
+        return {"error": "Prediction failed"}
     finally:
         # Clean up
         if os.path.exists(path):
@@ -80,8 +80,10 @@ async def predict(file: UploadFile = File(...)):
                 pass
 
     return {
-        "prediction": result,
-        "confidence": round(confidence * 100, 2)
+        "prediction": prediction,
+        "confidence": confidence,
+        "raw_scores": raw_scores,
+        "backend": "Keras/TensorFlow"
     }
 
 

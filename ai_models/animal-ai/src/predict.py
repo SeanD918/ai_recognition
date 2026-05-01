@@ -81,25 +81,27 @@ def predict_image(image_path):
     try:
         if model_type == 'keras':
             import tensorflow as tf
-            # Load and preprocess image for Keras (Expecting [-1, 1] with Bilinear interpolation)
-            img = tf.keras.preprocessing.image.load_img(image_path, target_size=(224, 224), interpolation='bilinear')
+            # Load and preprocess image for Keras (Expecting [0, 1])
+            img = tf.keras.preprocessing.image.load_img(image_path, target_size=(224, 224))
             img_array = tf.keras.preprocessing.image.img_to_array(img)
             img_array = np.expand_dims(img_array, 0)
-            img_array = (img_array / 127.5) - 1.0 # [-1, 1] normalization
+            img_array = (img_array / 127.5) - 1.0 # [-1, 1] normalization (Standard for MobileNetV2)
             
             # Use model(..., training=False) instead of model.predict for thread-safety and speed
             predictions = model(img_array, training=False)
+            
+            # Predictions from the model are already softmaxed
             score = predictions[0].numpy()
             
-            # Debug: Print all class probabilities
-            print("--- Class Probabilities ---")
-            for i, name in enumerate(CLASSES):
-                print(f"{name}: {score[i]:.4f}")
-            print("---------------------------")
+            # DEBUG: Print all class scores
+            raw_scores = {CLASSES[i]: float(score[i]) for i in range(len(CLASSES))}
+            print("\n--- Animal AI Debug Scores ---")
+            for animal, s in raw_scores.items():
+                print(f"{animal}: {s*100:.2f}%")
             
             class_idx = int(np.argmax(score))
             confidence = float(np.max(score))
-            return CLASSES[class_idx], confidence
+            return CLASSES[class_idx], confidence, raw_scores
         else:
             # PyTorch Path
             img = Image.open(image_path).convert("RGB")
