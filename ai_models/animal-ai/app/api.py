@@ -1,5 +1,10 @@
-import os
 import sys
+import os
+
+# TensorFlow Memory Optimization for Render Free Tier
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
+
 import shutil
 from fastapi import FastAPI, File, UploadFile, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -70,7 +75,7 @@ async def predict(file: UploadFile = File(...)):
         prediction, confidence, raw_scores = await run_in_threadpool(predict_image, path)
     except Exception as e:
         print(f"API Prediction Error: {e}")
-        return {"error": "Prediction failed"}
+        return {"error": f"Prediction failed: {str(e)}"}
     finally:
         # Clean up
         if os.path.exists(path):
