@@ -119,21 +119,29 @@ function App() {
 
         const data = await response.json();
         
+        if (data.error) {
+          setResults({ error: `Server Error: ${data.error}` });
+          setIsAnalyzing(false);
+          return;
+        }
+
         if (data.raw_scores) {
           console.log("--- Raw AI Scores ---");
           console.table(data.raw_scores);
         }
 
-        if (data.prediction === 'Not a human') {
+        const prediction = data.prediction || '';
+
+        if (prediction === 'Not a human') {
           setResults({ 
             error: 'No human face detected! The Gender AI only processes pictures of people. Please try again with a clear face photo.' 
           });
-        } else if (data.prediction.startsWith('Not an animal')) {
+        } else if (prediction.startsWith('Not an animal')) {
           setResults({ 
             error: 'No animal detected! This model is specifically designed for animal recognition. Please upload a clear photo of an animal.' 
           });
-        } else if (data.prediction.includes('Human detected')) {
-          setResults({ error: data.prediction });
+        } else if (prediction.includes('Human detected')) {
+          setResults({ error: prediction });
         } else {
           setResults({
             prediction: data.prediction,
