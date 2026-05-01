@@ -411,6 +411,12 @@ body {
   -webkit-text-fill-color: transparent;
 }
 
+.prediction.plant {
+  background: linear-gradient(to right, #10b981, #84cc16);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 .prediction.butterfly {
   background: linear-gradient(to right, #ec4899, #f472b6);
   -webkit-background-clip: text;

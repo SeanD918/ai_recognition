@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Upload, Loader2, Sparkles, AlertCircle, RefreshCw, BrainCircuit } from 'lucide-react';
+import { Upload, Loader2, Sparkles, AlertCircle, RefreshCw, BrainCircuit, Leaf } from 'lucide-react';
 import * as tf from '@tensorflow/tfjs';
 import './App.css';
 
@@ -13,7 +13,8 @@ function App() {
   const [animalClasses, setAnimalClasses] = useState([]);
   const [modelStatus, setModelStatus] = useState({
     animal: 'loading', // 'loading', 'ready', 'error'
-    gender: 'checking' // 'checking', 'online', 'offline'
+    gender: 'checking', // 'checking', 'online', 'offline'
+    plant: 'checking'
   });
   const abortControllerRef = useRef(null);
 
@@ -24,6 +25,7 @@ function App() {
       const GATEWAY_URL = (import.meta.env.VITE_GATEWAY_URL || 'http://localhost:3000').replace(/\/$/, "");
       const GENDER_API = (import.meta.env.VITE_GENDER_API_URL || 'http://localhost:8000').replace(/\/$/, "");
       const ANIMAL_API = (import.meta.env.VITE_ANIMAL_API_URL || 'http://localhost:8001').replace(/\/$/, "");
+      const PLANT_API = (import.meta.env.VITE_PLANT_API_URL || 'http://localhost:8002').replace(/\/$/, "");
 
       try {
         if (USE_GATEWAY) {
@@ -38,17 +40,21 @@ function App() {
           console.log(`Checking Animal API health at: ${ANIMAL_API}/`);
           const aRes = await fetch(`${ANIMAL_API}/`, { method: 'GET' });
           if (aRes.ok) setModelStatus(prev => ({ ...prev, animal: 'online' }));
+
+          console.log(`Checking Plant API health at: ${PLANT_API}/`);
+          const pRes = await fetch(`${PLANT_API}/`, { method: 'GET' });
+          if (pRes.ok) setModelStatus(prev => ({ ...prev, plant: 'online' }));
         }
       } catch (err) {
         console.warn('API Check Failed:', err);
         const isProduction = window.location.hostname !== 'localhost';
-        const isConfiguredForLocal = GENDER_API.includes('localhost') || ANIMAL_API.includes('localhost');
+        const isConfiguredForLocal = GENDER_API.includes('localhost') || ANIMAL_API.includes('localhost') || PLANT_API.includes('localhost');
         
         if (isProduction && isConfiguredForLocal) {
           console.error('CRITICAL: You are on Vercel but your APIs are set to localhost! Update your Vercel Environment Variables to point to Render.');
         }
         
-        setModelStatus({ gender: 'offline', animal: 'offline' });
+        setModelStatus({ gender: 'offline', animal: 'offline', plant: 'offline' });
       }
     }
     init();
@@ -91,12 +97,17 @@ function App() {
         const GATEWAY_URL = (import.meta.env.VITE_GATEWAY_URL || 'http://localhost:3000').replace(/\/$/, "");
         const GENDER_API = (import.meta.env.VITE_GENDER_API_URL || 'http://localhost:8000').replace(/\/$/, "");
         const ANIMAL_API = (import.meta.env.VITE_ANIMAL_API_URL || 'http://localhost:8001').replace(/\/$/, "");
+        const PLANT_API = (import.meta.env.VITE_PLANT_API_URL || 'http://localhost:8002').replace(/\/$/, "");
         
         let apiUrl = "";
         if (USE_GATEWAY) {
-          apiUrl = isAnimalFallback ? `${GATEWAY_URL}/api/animal` : `${GATEWAY_URL}/api/gender`;
+          if (modelType === 'animal') apiUrl = `${GATEWAY_URL}/api/animal`;
+          else if (modelType === 'plant') apiUrl = `${GATEWAY_URL}/api/plant`;
+          else apiUrl = `${GATEWAY_URL}/api/gender`;
         } else {
-          apiUrl = isAnimalFallback ? ANIMAL_API : GENDER_API;
+          if (modelType === 'animal') apiUrl = ANIMAL_API;
+          else if (modelType === 'plant') apiUrl = PLANT_API;
+          else apiUrl = GENDER_API;
         }
 
         const controller = new AbortController();
@@ -146,8 +157,10 @@ function App() {
           setResults({
             prediction: data.prediction,
             confidence: data.confidence, 
-            message: isAnimalFallback 
+            message: modelType === 'animal' 
               ? 'Analyzed using Keras / PyTorch Backend' 
+              : modelType === 'plant'
+              ? 'Analyzed using PyTorch/EfficientNet (Plants)'
               : 'Analyzed using PyTorch + ResNet18 (Gender)'
           });
         }
@@ -205,6 +218,18 @@ function App() {
               <h3>Animal AI</h3>
             </div>
           </div>
+
+          <div 
+            className={`model-card ${modelType === 'plant' ? 'active' : ''}`}
+            onClick={() => { setModelType('plant'); reset(); }}
+          >
+            <div className="card-icon">
+              <Leaf size={40} />
+            </div>
+            <div className="card-info">
+              <h3>Plant AI</h3>
+            </div>
+          </div>
         </div>
 
         <div className="status-bar">
@@ -222,6 +247,13 @@ function App() {
               ({(import.meta.env.VITE_ANIMAL_API_URL || 'localhost').includes('render.com') ? 'Cloud' : 'Local'})
             </small>
           </div>
+          <div className={`status-item ${modelStatus.plant === 'online' ? 'online' : 'offline'}`}>
+            <span className="status-dot"></span>
+            Plant AI: {modelStatus.plant === 'online' ? 'ONLINE' : 'OFFLINE'}
+            <small style={{ opacity: 0.5, marginLeft: '8px', fontSize: '0.7em' }}>
+              ({(import.meta.env.VITE_PLANT_API_URL || 'localhost').includes('render.com') ? 'Cloud' : 'Local'})
+            </small>
+          </div>
         </div>
       </header>
 
@@ -237,7 +269,7 @@ function App() {
             />
             <label htmlFor="file-upload" className="upload-label">
               <Upload size={48} className="upload-icon" />
-              <span className="upload-text">Upload {modelType === 'gender' ? 'a Face' : 'an Animal'}</span>
+              <span className="upload-text">Upload {modelType === 'gender' ? 'a Face' : modelType === 'animal' ? 'an Animal' : 'a Plant'}</span>
               <span className="upload-subtext">Supports PNG, JPG</span>
             </label>
           </div>

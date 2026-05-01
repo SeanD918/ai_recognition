@@ -20,3 +20,14 @@ services:
     envVars:
       - key: PORT
         value: 10001
+
+  - type: web
+    name: plant-ai-backend
+    env: docker
+    region: oregon
+    plan: free
+    rootDir: ai_models/plant-ai
+    healthCheckPath: /
+    envVars:
+      - key: PORT
+        value: 10002
