@@ -11,7 +11,7 @@ from preprocess import predict_transform
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
 MODEL_PTH_PATH = os.path.join(PROJECT_ROOT, "saved_models", "animal_model.pth")
-MODEL_KERAS_PATH = os.path.join(PROJECT_ROOT, "saved_models", "animal_model_fixed.keras")
+MODEL_KERAS_PATH = os.path.join(PROJECT_ROOT, "saved_models", "animal_model.keras")
 CLASSES_PATH = os.path.join(PROJECT_ROOT, "saved_models", "classes.json")
 
 # Default classes (fallback)
