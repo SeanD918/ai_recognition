@@ -19,7 +19,7 @@ app.get('/', (req, res) => {
         endpoints: {
             gender: '/api/gender/predict',
             animal: '/api/animal/predict',
-            plant: '/api/plant/predict'
+            flower: '/api/flower/predict'
         }
     });
 });
@@ -68,10 +68,10 @@ app.post('/api/animal/predict', upload.single('file'), async (req, res) => {
     }
 });
 
-// 4. Plant AI Proxy
-app.post('/api/plant/predict', upload.single('file'), async (req, res) => {
+// 4. Flower AI Proxy
+app.post('/api/flower/predict', upload.single('file'), async (req, res) => {
     try {
-        const PLANT_API = process.env.PLANT_API_URL || 'http://localhost:8002';
+        const FLOWER_API = process.env.FLOWER_API_URL || 'http://localhost:8002';
         
         const form = new FormData();
         form.append('file', req.file.buffer, {
@@ -79,14 +79,14 @@ app.post('/api/plant/predict', upload.single('file'), async (req, res) => {
             contentType: req.file.mimetype,
         });
 
-        const response = await axios.post(`${PLANT_API}/predict`, form, {
+        const response = await axios.post(`${FLOWER_API}/predict`, form, {
             headers: { ...form.getHeaders() }
         });
 
         res.json(response.data);
     } catch (error) {
-        console.error('Plant Proxy Error:', error.message);
-        res.status(500).json({ error: 'Plant AI Service unreachable', details: error.message });
+        console.error('Flower Proxy Error:', error.message);
+        res.status(500).json({ error: 'Flower AI Service unreachable', details: error.message });
     }
 });
 

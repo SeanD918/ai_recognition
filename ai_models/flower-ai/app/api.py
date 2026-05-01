@@ -10,7 +10,7 @@ sys.path.append(os.path.join(BASE_DIR, "src"))
 
 from predict import predict_image, load_model_if_needed, get_backend_name
 
-app = FastAPI(title="Plant Recognition API")
+app = FastAPI(title="Flower Recognition API")
 
 app.add_middleware(
     CORSMiddleware,
@@ -22,7 +22,7 @@ app.add_middleware(
 
 @app.get("/")
 async def health():
-    return {"status": "Plant AI is Online", "backend": get_backend_name()}
+    return {"status": "Flower AI is Online", "backend": get_backend_name()}
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):

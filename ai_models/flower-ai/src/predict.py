@@ -9,7 +9,7 @@ from preprocess import predict_transform
 # Paths
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
-MODEL_PTH_PATH = os.path.join(PROJECT_ROOT, "saved_models", "plant_model.pth")
+MODEL_PTH_PATH = os.path.join(PROJECT_ROOT, "saved_models", "flower_model.pth")
 CLASSES_PATH = os.path.join(PROJECT_ROOT, "saved_models", "classes.json")
 
 # Defaults
@@ -30,9 +30,9 @@ def load_model_if_needed():
     model = get_model(num_classes=num_classes, pretrained=False)
     if os.path.exists(MODEL_PTH_PATH):
         model.load_state_dict(torch.load(MODEL_PTH_PATH, map_location=device))
-        print(f"Loaded Plant AI model from {MODEL_PTH_PATH}")
+        print(f"Loaded Flower AI model from {MODEL_PTH_PATH}")
     else:
-        print("Warning: Plant AI model weights not found, using random weights.")
+        print("Warning: Flower AI model weights not found, using random weights.")
     
     model.to(device)
     model.eval()
@@ -56,8 +56,8 @@ def predict_image(image_path):
 
         return CLASSES[class_idx], conf_val, raw_scores
     except Exception as e:
-        print(f"Plant Prediction Error: {e}")
+        print(f"Flower Prediction Error: {e}")
         return "Error in prediction", 0.0, {}
 
 def get_backend_name():
-    return "PyTorch/EfficientNet-B0 (Plants)"
+    return "PyTorch/EfficientNet-B0 (Flowers)"

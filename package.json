@@ -8,7 +8,8 @@
     "server": "npm start --prefix server",
     "gender-ai": "cd ai_models/gender-ai && python -m uvicorn app.api:app --host 0.0.0.0 --port 8000 --reload",
     "animal-ai": "cd ai_models/animal-ai && python -m uvicorn app.api:app --host 0.0.0.0 --port 8001 --reload",
-    "dev": "npx concurrently \"npm run client\" \"npm run server\" \"npm run gender-ai\" \"npm run animal-ai\""
+    "flower-ai": "cd ai_models/flower-ai && python -m uvicorn app.api:app --host 0.0.0.0 --port 8002 --reload",
+    "dev": "npx concurrently \"npm run client\" \"npm run server\" \"npm run gender-ai\" \"npm run animal-ai\" \"npm run flower-ai\""
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

@@ -411,7 +411,7 @@ body {
   -webkit-text-fill-color: transparent;
 }
 
-.prediction.plant {
+.prediction.flower {
   background: linear-gradient(to right, #10b981, #84cc16);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;

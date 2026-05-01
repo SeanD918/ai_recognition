@@ -14,7 +14,7 @@ function App() {
   const [modelStatus, setModelStatus] = useState({
     animal: 'loading', // 'loading', 'ready', 'error'
     gender: 'checking', // 'checking', 'online', 'offline'
-    plant: 'checking'
+    flower: 'checking'
   });
   const abortControllerRef = useRef(null);
 
@@ -25,7 +25,7 @@ function App() {
       const GATEWAY_URL = (import.meta.env.VITE_GATEWAY_URL || 'http://localhost:3000').replace(/\/$/, "");
       const GENDER_API = (import.meta.env.VITE_GENDER_API_URL || 'http://localhost:8000').replace(/\/$/, "");
       const ANIMAL_API = (import.meta.env.VITE_ANIMAL_API_URL || 'http://localhost:8001').replace(/\/$/, "");
-      const PLANT_API = (import.meta.env.VITE_PLANT_API_URL || 'http://localhost:8002').replace(/\/$/, "");
+      const FLOWER_API = (import.meta.env.VITE_FLOWER_API_URL || 'http://localhost:8002').replace(/\/$/, "");
 
       try {
         if (USE_GATEWAY) {
@@ -41,20 +41,20 @@ function App() {
           const aRes = await fetch(`${ANIMAL_API}/`, { method: 'GET' });
           if (aRes.ok) setModelStatus(prev => ({ ...prev, animal: 'online' }));
 
-          console.log(`Checking Plant API health at: ${PLANT_API}/`);
-          const pRes = await fetch(`${PLANT_API}/`, { method: 'GET' });
-          if (pRes.ok) setModelStatus(prev => ({ ...prev, plant: 'online' }));
+          console.log(`Checking Flower API health at: ${FLOWER_API}/`);
+          const pRes = await fetch(`${FLOWER_API}/`, { method: 'GET' });
+          if (pRes.ok) setModelStatus(prev => ({ ...prev, flower: 'online' }));
         }
       } catch (err) {
         console.warn('API Check Failed:', err);
         const isProduction = window.location.hostname !== 'localhost';
-        const isConfiguredForLocal = GENDER_API.includes('localhost') || ANIMAL_API.includes('localhost') || PLANT_API.includes('localhost');
+        const isConfiguredForLocal = GENDER_API.includes('localhost') || ANIMAL_API.includes('localhost') || FLOWER_API.includes('localhost');
         
         if (isProduction && isConfiguredForLocal) {
           console.error('CRITICAL: You are on Vercel but your APIs are set to localhost! Update your Vercel Environment Variables to point to Render.');
         }
         
-        setModelStatus({ gender: 'offline', animal: 'offline', plant: 'offline' });
+        setModelStatus({ gender: 'offline', animal: 'offline', flower: 'offline' });
       }
     }
     init();
@@ -97,16 +97,16 @@ function App() {
         const GATEWAY_URL = (import.meta.env.VITE_GATEWAY_URL || 'http://localhost:3000').replace(/\/$/, "");
         const GENDER_API = (import.meta.env.VITE_GENDER_API_URL || 'http://localhost:8000').replace(/\/$/, "");
         const ANIMAL_API = (import.meta.env.VITE_ANIMAL_API_URL || 'http://localhost:8001').replace(/\/$/, "");
-        const PLANT_API = (import.meta.env.VITE_PLANT_API_URL || 'http://localhost:8002').replace(/\/$/, "");
+        const FLOWER_API = (import.meta.env.VITE_FLOWER_API_URL || 'http://localhost:8002').replace(/\/$/, "");
         
         let apiUrl = "";
         if (USE_GATEWAY) {
           if (modelType === 'animal') apiUrl = `${GATEWAY_URL}/api/animal`;
-          else if (modelType === 'plant') apiUrl = `${GATEWAY_URL}/api/plant`;
+          else if (modelType === 'flower') apiUrl = `${GATEWAY_URL}/api/flower`;
           else apiUrl = `${GATEWAY_URL}/api/gender`;
         } else {
           if (modelType === 'animal') apiUrl = ANIMAL_API;
-          else if (modelType === 'plant') apiUrl = PLANT_API;
+          else if (modelType === 'flower') apiUrl = FLOWER_API;
           else apiUrl = GENDER_API;
         }
 
@@ -159,8 +159,8 @@ function App() {
             confidence: data.confidence, 
             message: modelType === 'animal' 
               ? 'Analyzed using Keras / PyTorch Backend' 
-              : modelType === 'plant'
-              ? 'Analyzed using PyTorch/EfficientNet (Plants)'
+              : modelType === 'flower'
+              ? 'Analyzed using PyTorch/EfficientNet (Flowers)'
               : 'Analyzed using PyTorch + ResNet18 (Gender)'
           });
         }
@@ -220,14 +220,14 @@ function App() {
           </div>
 
           <div 
-            className={`model-card ${modelType === 'plant' ? 'active' : ''}`}
-            onClick={() => { setModelType('plant'); reset(); }}
+            className={`model-card ${modelType === 'flower' ? 'active' : ''}`}
+            onClick={() => { setModelType('flower'); reset(); }}
           >
             <div className="card-icon">
               <Leaf size={40} />
             </div>
             <div className="card-info">
-              <h3>Plant AI</h3>
+              <h3>Flower AI</h3>
             </div>
           </div>
         </div>
@@ -247,11 +247,11 @@ function App() {
               ({(import.meta.env.VITE_ANIMAL_API_URL || 'localhost').includes('render.com') ? 'Cloud' : 'Local'})
             </small>
           </div>
-          <div className={`status-item ${modelStatus.plant === 'online' ? 'online' : 'offline'}`}>
+          <div className={`status-item ${modelStatus.flower === 'online' ? 'online' : 'offline'}`}>
             <span className="status-dot"></span>
-            Plant AI: {modelStatus.plant === 'online' ? 'ONLINE' : 'OFFLINE'}
+            Flower AI: {modelStatus.flower === 'online' ? 'ONLINE' : 'OFFLINE'}
             <small style={{ opacity: 0.5, marginLeft: '8px', fontSize: '0.7em' }}>
-              ({(import.meta.env.VITE_PLANT_API_URL || 'localhost').includes('render.com') ? 'Cloud' : 'Local'})
+              ({(import.meta.env.VITE_FLOWER_API_URL || 'localhost').includes('render.com') ? 'Cloud' : 'Local'})
             </small>
           </div>
         </div>
@@ -269,7 +269,7 @@ function App() {
             />
             <label htmlFor="file-upload" className="upload-label">
               <Upload size={48} className="upload-icon" />
-              <span className="upload-text">Upload {modelType === 'gender' ? 'a Face' : modelType === 'animal' ? 'an Animal' : 'a Plant'}</span>
+              <span className="upload-text">Upload {modelType === 'gender' ? 'a Face' : modelType === 'animal' ? 'an Animal' : 'a Flower'}</span>
               <span className="upload-subtext">Supports PNG, JPG</span>
             </label>
           </div>

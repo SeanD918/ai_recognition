@@ -10,7 +10,7 @@ from preprocess import train_transform
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
 DATA_DIR = os.path.join(PROJECT_ROOT, "data", "train")
-SAVE_PATH = os.path.join(PROJECT_ROOT, "saved_models", "plant_model.pth")
+SAVE_PATH = os.path.join(PROJECT_ROOT, "saved_models", "flower_model.pth")
 CLASSES_PATH = os.path.join(PROJECT_ROOT, "saved_models", "classes.json")
 EPOCHS = 10
 BATCH_SIZE = 16
@@ -32,7 +32,7 @@ def train():
             
         print(f"Classes: {train_data.classes}")
     except Exception as e:
-        print(f"Error: {e}. Please add plant images to {DATA_DIR}")
+        print(f"Error: {e}. Please add flower images to {DATA_DIR}")
         return
 
     # Model

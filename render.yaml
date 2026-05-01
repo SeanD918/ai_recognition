@@ -22,11 +22,11 @@ services:
         value: 10001
 
   - type: web
-    name: plant-ai-backend
+    name: flower-ai-backend
     env: docker
     region: oregon
     plan: free
-    rootDir: ai_models/plant-ai
+    rootDir: ai_models/flower-ai
     healthCheckPath: /
     envVars:
       - key: PORT
