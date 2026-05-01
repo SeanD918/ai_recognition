@@ -31,3 +31,20 @@ services:
     envVars:
       - key: PORT
         value: 10002
+
+  - type: web
+    name: ai-recognition-gateway
+    env: node
+    region: oregon
+    plan: free
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: GENDER_API_URL
+        value: https://gender-ai-backend.onrender.com
+      - key: ANIMAL_API_URL
+        value: https://animal-ai-backend.onrender.com
+      - key: FLOWER_API_URL
+        value: https://flower-ai-backend.onrender.com
+
