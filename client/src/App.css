@@ -526,10 +526,10 @@ body {
 /* Model Selection Cards */
 .model-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
   width: 100%;
-  max-width: 500px;
+  max-width: 750px;
   margin: 1.5rem 0;
 }
 
