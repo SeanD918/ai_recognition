@@ -13,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(os.path.join(BASE_DIR, "src"))
 
-from predict import predict_image, load_model_if_needed
+from predict import predict_image, load_model_if_needed, get_backend_name
 
 app = FastAPI(title="Animal Recognition API")
 
@@ -86,9 +86,9 @@ async def predict(file: UploadFile = File(...)):
 
     return {
         "prediction": prediction,
-        "confidence": confidence,
+        "confidence": round(confidence * 100, 2),
         "raw_scores": raw_scores,
-        "backend": "Keras/TensorFlow"
+        "backend": get_backend_name()
     }
 
 
