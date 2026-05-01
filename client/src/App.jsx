@@ -30,7 +30,7 @@ function App() {
       try {
         if (USE_GATEWAY) {
           const res = await fetch(`${GATEWAY_URL}/`, { method: 'GET' });
-          if (res.ok) setModelStatus({ gender: 'online', animal: 'online' });
+          if (res.ok) setModelStatus({ gender: 'online', animal: 'online', flower: 'online' });
         } else {
           // Check individual APIs
           console.log(`Checking Gender API health at: ${GENDER_API}/`);
