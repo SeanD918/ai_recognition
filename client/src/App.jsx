@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Upload, Loader2, Sparkles, AlertCircle, RefreshCw, BrainCircuit, Leaf } from 'lucide-react';
+import { Upload, Loader2, Sparkles, AlertCircle, RefreshCw, BrainCircuit, Leaf, Hand } from 'lucide-react';
+import HandAI from './components/HandAI';
 import * as tf from '@tensorflow/tfjs';
 import './App.css';
 
@@ -230,6 +231,18 @@ function App() {
               <h3>Flower AI</h3>
             </div>
           </div>
+
+          <div 
+            className={`model-card ${modelType === 'hand' ? 'active' : ''}`}
+            onClick={() => { setModelType('hand'); reset(); }}
+          >
+            <div className="card-icon">
+              <Hand size={40} />
+            </div>
+            <div className="card-info">
+              <h3>Hand AI</h3>
+            </div>
+          </div>
         </div>
 
         <div className="status-bar">
@@ -258,88 +271,94 @@ function App() {
       </header>
 
       <div className="main-content">
-        {!imageSrc && (
-          <div className="upload-container" style={{ animation: 'fadeIn 0.5s ease-out' }}>
-            <input
-              type="file"
-              id="file-upload"
-              accept="image/*"
-              className="file-input"
-              onChange={handleImageUpload}
-            />
-            <label htmlFor="file-upload" className="upload-label">
-              <Upload size={48} className="upload-icon" />
-              <span className="upload-text">Upload {modelType === 'gender' ? 'a Face' : modelType === 'animal' ? 'an Animal' : 'a Flower'}</span>
-              <span className="upload-subtext">Supports PNG, JPG</span>
-            </label>
-          </div>
-        )}
-
-        {imageSrc && (
-          <div className="analysis-container">
-            <div className="image-wrapper">
-              <img
-                src={imageSrc}
-                alt="Analysis Target"
-                className="uploaded-image"
-                onLoad={() => performAnalysis(imageFile)}
-              />
-              {isAnalyzing && (
-                <div className="scanning-overlay">
-                  <div className="scanner-line"></div>
-                  <p>Processing via Neural Network...</p>
-                </div>
-              )}
-            </div>
-
-            {!isAnalyzing && results && (
-              <div className={`results-card ${results.error ? 'error' : 'success'}`}>
-                {results.error ? (
-                  <>
-                    <AlertCircle size={32} style={{ flexShrink: 0 }} />
-                    <h3>{results.error}</h3>
-                  </>
-                ) : (
-                  <>
-                    <div className="result-main">
-                      <span className="label">Recognition Result</span>
-                      <h2 className={`prediction ${results.prediction}`}>
-                        {results.prediction.charAt(0).toUpperCase() + results.prediction.slice(1)}
-                      </h2>
-                      <div className="confidence-container">
-                        <div className="confidence-header">
-                          <span>Model Confidence</span>
-                          <span>{results.confidence}%</span>
-                        </div>
-                        <div className="confidence-bar-bg">
-                          <div 
-                            className={`confidence-bar-fill ${results.confidence > 80 ? 'high' : results.confidence > 50 ? 'medium' : 'low'}`}
-                            style={{ width: `${results.confidence}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                      <p className="result-message">{results.message}</p>
-                    </div>
-                    <div className="result-footer">
-                      <div className="info-badge">
-                        <BrainCircuit size={14} />
-                        <span>ResNet18 / EfficientNet</span>
-                      </div>
-                      <div className="info-badge">
-                        <Sparkles size={14} />
-                        <span>AI Augmented</span>
-                      </div>
-                    </div>
-                  </>
-                )}
+        {modelType === 'hand' ? (
+          <HandAI onBack={() => setModelType('gender')} />
+        ) : (
+          <>
+            {!imageSrc && (
+              <div className="upload-container" style={{ animation: 'fadeIn 0.5s ease-out' }}>
+                <input
+                  type="file"
+                  id="file-upload"
+                  accept="image/*"
+                  className="file-input"
+                  onChange={handleImageUpload}
+                />
+                <label htmlFor="file-upload" className="upload-label">
+                  <Upload size={48} className="upload-icon" />
+                  <span className="upload-text">Upload {modelType === 'gender' ? 'a Face' : modelType === 'animal' ? 'an Animal' : 'a Flower'}</span>
+                  <span className="upload-subtext">Supports PNG, JPG</span>
+                </label>
               </div>
             )}
 
-            <button className="reset-button" onClick={reset}>
-              <RefreshCw size={20} />
-              <span>Try Another Photo</span>
-            </button>
-          </div>
+            {imageSrc && (
+              <div className="analysis-container">
+                <div className="image-wrapper">
+                  <img
+                    src={imageSrc}
+                    alt="Analysis Target"
+                    className="uploaded-image"
+                    onLoad={() => performAnalysis(imageFile)}
+                  />
+                  {isAnalyzing && (
+                    <div className="scanning-overlay">
+                      <div className="scanner-line"></div>
+                      <p>Processing via Neural Network...</p>
+                    </div>
+                  )}
+                </div>
+
+                {!isAnalyzing && results && (
+                  <div className={`results-card ${results.error ? 'error' : 'success'}`}>
+                    {results.error ? (
+                      <>
+                        <AlertCircle size={32} style={{ flexShrink: 0 }} />
+                        <h3>{results.error}</h3>
+                      </>
+                    ) : (
+                      <>
+                        <div className="result-main">
+                          <span className="label">Recognition Result</span>
+                          <h2 className={`prediction ${results.prediction}`}>
+                            {results.prediction.charAt(0).toUpperCase() + results.prediction.slice(1)}
+                          </h2>
+                          <div className="confidence-container">
+                            <div className="confidence-header">
+                              <span>Model Confidence</span>
+                              <span>{results.confidence}%</span>
+                            </div>
+                            <div className="confidence-bar-bg">
+                              <div 
+                                className={`confidence-bar-fill ${results.confidence > 80 ? 'high' : results.confidence > 50 ? 'medium' : 'low'}`}
+                                style={{ width: `${results.confidence}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                          <p className="result-message">{results.message}</p>
+                        </div>
+                        <div className="result-footer">
+                          <div className="info-badge">
+                            <BrainCircuit size={14} />
+                            <span>ResNet18 / EfficientNet</span>
+                          </div>
+                          <div className="info-badge">
+                            <Sparkles size={14} />
+                            <span>AI Augmented</span>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+
+                <button className="reset-button" onClick={reset}>
+                  <RefreshCw size={20} />
+                  <span>Try Another Photo</span>
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
