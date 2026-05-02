@@ -1,125 +1,212 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { Hands } from '@mediapipe/hands';
-import * as cam from '@mediapipe/camera_utils';
-import * as draw from '@mediapipe/drawing_utils';
-import { Hand, Camera, XCircle } from 'lucide-react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
+import { Camera as CameraIcon, XCircle, Plus, Trash2 } from 'lucide-react';
+
+const HAND_API = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const CAPTURE_INTERVAL_MS = 2500; // CPU inference takes ~2s; don't pile up
+const SEND_SIZE = 224;            // Match model input size exactly
 
 const HandAI = ({ onBack }) => {
-  const videoRef = useRef(null);
-  const canvasRef = useRef(null);
-  const [fingerCount, setFingerCount] = useState(0);
+  const videoRef    = useRef(null);
+  const canvasRef   = useRef(null);
+  const intervalRef = useRef(null);
+  const streamRef   = useRef(null);
+  const isPredicting = useRef(false); // Prevents request pile-up
+
+  const [result,       setResult]       = useState('–');
+  const [confidence,   setConfidence]   = useState(null);
+  const [sentence,     setSentence]     = useState('');
   const [isCameraReady, setIsCameraReady] = useState(false);
+  const [isLoading,    setIsLoading]    = useState(false);
+  const [error,        setError]        = useState(null);
+  const [backend,      setBackend]      = useState(null);
 
+  // ── Start webcam ─────────────────────────────────────────────────────────
   useEffect(() => {
-    const hands = new Hands({
-      locateFile: (file) => {
-        return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
-      },
-    });
+    let active = true;
 
-    hands.setOptions({
-      maxNumHands: 1,
-      modelComplexity: 1,
-      minDetectionConfidence: 0.5,
-      minTrackingConfidence: 0.5,
-    });
-
-    hands.onResults((results) => {
-      const canvasCtx = canvasRef.current.getContext('2d');
-      canvasCtx.save();
-      canvasCtx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-      
-      // Draw video frame manually to maintain sync or just draw landmarks
-      if (results.multiHandLandmarks) {
-        for (const landmarks of results.multiHandLandmarks) {
-          draw.drawConnectors(canvasCtx, landmarks, Hands.HAND_CONNECTIONS, {
-            color: '#6366f1',
-            lineWidth: 5,
+    navigator.mediaDevices
+      .getUserMedia({ video: { width: 640, height: 480, facingMode: 'user' } })
+      .then((stream) => {
+        if (!active) return;
+        streamRef.current = stream;
+        const video = videoRef.current;
+        if (!video) return;
+        video.srcObject = stream;
+        // Wait for metadata so videoWidth/Height are known before capturing
+        video.onloadedmetadata = () => {
+          video.play().then(() => {
+            if (active) setIsCameraReady(true);
           });
-          draw.drawLandmarks(canvasCtx, landmarks, {
-            color: '#ffffff',
-            lineWidth: 2,
-            radius: 4,
-          });
-
-          // Logic to count fingers
-          let count = 0;
-          
-          // Finger tips: 8, 12, 16, 20
-          // Knuckles: 5, 9, 13, 17
-          const fingerTips = [8, 12, 16, 20];
-          const knuckles = [5, 9, 13, 17];
-
-          // 4 Fingers
-          for (let i = 0; i < 4; i++) {
-            if (landmarks[fingerTips[i]].y < landmarks[knuckles[i]].y) {
-              count++;
-            }
-          }
-
-          // Thumb (Special logic - horizontal distance for simplicity)
-          // Compare thumb tip (4) to thumb base (2)
-          const thumbTip = landmarks[4];
-          const thumbBase = landmarks[2];
-          const thumbMCP = landmarks[3];
-          
-          // Simple thumb check: is tip further out than base? 
-          // This depends on left/right hand, but we'll use a simpler vertical/horizontal check
-          if (Math.abs(thumbTip.x - landmarks[9].x) > Math.abs(thumbMCP.x - landmarks[9].x)) {
-            count++;
-          }
-
-          setFingerCount(count);
-        }
-      } else {
-        setFingerCount(0);
-      }
-      canvasCtx.restore();
-    });
-
-    if (videoRef.current) {
-      const camera = new cam.Camera(videoRef.current, {
-        onFrame: async () => {
-          await hands.send({ image: videoRef.current });
-        },
-        width: 640,
-        height: 480,
-      });
-      camera.start();
-      setIsCameraReady(true);
-    }
+        };
+      })
+      .catch((err) => setError('Camera access denied: ' + err.message));
 
     return () => {
-      hands.close();
+      active = false;
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+      clearInterval(intervalRef.current);
     };
   }, []);
 
+  // ── Capture one frame & send to backend ─────────────────────────────────
+  const captureAndPredict = useCallback(async () => {
+    if (isPredicting.current) return; // Skip if previous request is still running
+    const video  = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas || video.readyState < 2) return; // Video not ready
+
+    const ctx = canvas.getContext('2d');
+    canvas.width  = SEND_SIZE;
+    canvas.height = SEND_SIZE;
+    // Draw without mirroring — model expects natural (unflipped) hand orientation
+    ctx.drawImage(video, 0, 0, SEND_SIZE, SEND_SIZE);
+
+    canvas.toBlob(
+      async (blob) => {
+        if (!blob) return;
+        isPredicting.current = true;
+        setIsLoading(true);
+        try {
+          const form = new FormData();
+          form.append('file', blob, 'frame.jpg');
+          const res = await fetch(`${HAND_API}/api/hand/predict`, {
+            method: 'POST',
+            body: form,
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+
+          if (data.error) {
+            setError(data.error);
+          } else {
+            setError(null);
+            setResult(data.prediction ?? '–');
+            setConfidence(data.confidence ?? null);
+            setBackend(data.backend ?? null);
+          }
+        } catch (err) {
+          setError('Prediction failed: ' + err.message);
+        } finally {
+          isPredicting.current = false;
+          setIsLoading(false);
+        }
+      },
+      'image/jpeg',
+      0.8
+    );
+  }, []);
+
+  // ── Start / stop prediction loop ─────────────────────────────────────────
+  useEffect(() => {
+    if (!isCameraReady) return;
+    intervalRef.current = setInterval(captureAndPredict, CAPTURE_INTERVAL_MS);
+    return () => clearInterval(intervalRef.current);
+  }, [isCameraReady, captureAndPredict]);
+
+  const handleAdd = () => {
+    if (result && result !== '–') setSentence((s) => s + result);
+  };
+
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="hand-ai-container" style={{ animation: 'fadeIn 0.5s ease-out' }}>
+
+      {/* Header */}
       <div className="hand-ai-header">
         <button className="back-button" onClick={onBack}>
           <XCircle size={24} />
           <span>Close Hand AI</span>
         </button>
         <div className="count-display">
-          <span className="count-label">Fingers Detected</span>
-          <h2 className="count-number">{fingerCount}</h2>
+          <span className="count-label">ASL Letter</span>
+          <h2 className="count-number">
+            {isLoading ? '…' : result}
+          </h2>
+          {confidence !== null && !isLoading && (
+            <span style={{ fontSize: '0.75rem', opacity: 0.6 }}>
+              {confidence.toFixed(1)}% confidence
+            </span>
+          )}
         </div>
       </div>
 
-      <div className="camera-wrapper">
-        <video ref={videoRef} className="hidden-video" style={{ display: 'none' }} />
-        <canvas ref={canvasRef} width={640} height={480} className="hand-canvas" />
+      {/* Status bar */}
+      {(error || backend) && (
+        <div style={{
+          textAlign: 'center',
+          fontSize: '0.75rem',
+          padding: '0.3rem 1rem',
+          color: error ? '#f87171' : '#6ee7b7',
+          background: error ? 'rgba(239,68,68,0.1)' : 'rgba(110,231,183,0.08)',
+        }}>
+          {error || `✓ Backend: ${backend}`}
+        </div>
+      )}
+
+      {/* Camera feed */}
+      <div className="camera-wrapper" style={{ position: 'relative' }}>
+        {/* Live video — mirrored for natural selfie feel */}
+        <video
+          ref={videoRef}
+          width={640}
+          height={480}
+          className="hand-canvas"
+          autoPlay
+          muted
+          playsInline
+          style={{ transform: 'scaleX(-1)', display: 'block' }}
+        />
+        {/* Hidden canvas used only for frame capture */}
+        <canvas ref={canvasRef} style={{ display: 'none' }} />
+
         {!isCameraReady && (
           <div className="camera-loading">
-            <Camera className="animate-pulse" size={48} />
+            <CameraIcon className="animate-pulse" size={48} />
             <p>Initializing Camera...</p>
+          </div>
+        )}
+
+        {/* Scanning indicator */}
+        {isCameraReady && isLoading && (
+          <div style={{
+            position: 'absolute', top: 8, right: 8,
+            background: 'rgba(99,102,241,0.85)',
+            color: '#fff', fontSize: '0.7rem', padding: '2px 8px',
+            borderRadius: 999,
+          }}>
+            Scanning…
           </div>
         )}
       </div>
 
+      {/* Instructions */}
       <div className="hand-instructions">
-        <p>Show your hand to the camera to count fingers!</p>
+        <p>Hold your ASL sign steady — the camera reads it every 2.5 seconds.</p>
+      </div>
+
+      {/* Sentence builder */}
+      <div className="asl-sentence-builder">
+        <h3 className="builder-title">ASL Sentence Builder</h3>
+        <div className="sentence-box">
+          {sentence || (
+            <span className="placeholder">
+              Press "Add" after each letter to build a word…
+            </span>
+          )}
+        </div>
+        <div className="sentence-controls">
+          <button className="control-btn add" onClick={handleAdd} disabled={result === '–'}>
+            <Plus size={16} />
+            Add "{result}"
+          </button>
+          <button className="control-btn space" onClick={() => setSentence((s) => s + ' ')}>
+            ␣ Space
+          </button>
+          <button className="control-btn clear" onClick={() => setSentence('')}>
+            <Trash2 size={16} />
+            Clear
+          </button>
+        </div>
       </div>
     </div>
   );

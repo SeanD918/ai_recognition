@@ -33,6 +33,17 @@ services:
         value: 10002
 
   - type: web
+    name: hand-ai-backend
+    env: docker
+    region: oregon
+    plan: free
+    rootDir: ai_models/hand-ai
+    healthCheckPath: /
+    envVars:
+      - key: PORT
+        value: 10003
+
+  - type: web
     name: ai-recognition-gateway
     env: node
     region: oregon
@@ -47,4 +58,6 @@ services:
         value: https://animal-ai-backend.onrender.com
       - key: FLOWER_API_URL
         value: https://flower-ai-backend.onrender.com
+      - key: HAND_API_URL
+        value: https://hand-ai-backend.onrender.com
 

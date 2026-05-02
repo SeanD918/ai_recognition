@@ -13,9 +13,10 @@ function App() {
   const [animalModel, setAnimalModel] = useState(null);
   const [animalClasses, setAnimalClasses] = useState([]);
   const [modelStatus, setModelStatus] = useState({
-    animal: 'loading', // 'loading', 'ready', 'error'
-    gender: 'checking', // 'checking', 'online', 'offline'
-    flower: 'checking'
+    animal: 'loading',
+    gender: 'checking',
+    flower: 'checking',
+    hand: 'checking'
   });
   const abortControllerRef = useRef(null);
 
@@ -27,11 +28,17 @@ function App() {
       const GENDER_API = (import.meta.env.VITE_GENDER_API_URL || 'http://localhost:8000').replace(/\/$/, "");
       const ANIMAL_API = (import.meta.env.VITE_ANIMAL_API_URL || 'http://localhost:8001').replace(/\/$/, "");
       const FLOWER_API = (import.meta.env.VITE_FLOWER_API_URL || 'http://localhost:8002').replace(/\/$/, "");
+      const HAND_API = (import.meta.env.VITE_HAND_API_URL || 'http://localhost:8003').replace(/\/$/, "");
 
       try {
         if (USE_GATEWAY) {
           const res = await fetch(`${GATEWAY_URL}/`, { method: 'GET' });
-          if (res.ok) setModelStatus({ gender: 'online', animal: 'online', flower: 'online' });
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.services) {
+              setModelStatus(data.services);
+            }
+          }
         } else {
           // Check individual APIs
           console.log(`Checking Gender API health at: ${GENDER_API}/`);
@@ -45,6 +52,10 @@ function App() {
           console.log(`Checking Flower API health at: ${FLOWER_API}/`);
           const pRes = await fetch(`${FLOWER_API}/`, { method: 'GET' });
           if (pRes.ok) setModelStatus(prev => ({ ...prev, flower: 'online' }));
+
+          console.log(`Checking Hand API health at: ${HAND_API}/`);
+          const hRes = await fetch(`${HAND_API}/`, { method: 'GET' });
+          if (hRes.ok) setModelStatus(prev => ({ ...prev, hand: 'online' }));
         }
       } catch (err) {
         console.warn('API Check Failed:', err);
@@ -55,7 +66,7 @@ function App() {
           console.error('CRITICAL: You are on Vercel but your APIs are set to localhost! Update your Vercel Environment Variables to point to Render.');
         }
         
-        setModelStatus({ gender: 'offline', animal: 'offline', flower: 'offline' });
+        setModelStatus({ gender: 'offline', animal: 'offline', flower: 'offline', hand: 'offline' });
       }
     }
     init();
@@ -99,15 +110,18 @@ function App() {
         const GENDER_API = (import.meta.env.VITE_GENDER_API_URL || 'http://localhost:8000').replace(/\/$/, "");
         const ANIMAL_API = (import.meta.env.VITE_ANIMAL_API_URL || 'http://localhost:8001').replace(/\/$/, "");
         const FLOWER_API = (import.meta.env.VITE_FLOWER_API_URL || 'http://localhost:8002').replace(/\/$/, "");
+        const HAND_API = (import.meta.env.VITE_HAND_API_URL || 'http://localhost:8003').replace(/\/$/, "");
         
         let apiUrl = "";
         if (USE_GATEWAY) {
           if (modelType === 'animal') apiUrl = `${GATEWAY_URL}/api/animal`;
           else if (modelType === 'flower') apiUrl = `${GATEWAY_URL}/api/flower`;
+          else if (modelType === 'hand') apiUrl = `${GATEWAY_URL}/api/hand`;
           else apiUrl = `${GATEWAY_URL}/api/gender`;
         } else {
           if (modelType === 'animal') apiUrl = ANIMAL_API;
           else if (modelType === 'flower') apiUrl = FLOWER_API;
+          else if (modelType === 'hand') apiUrl = HAND_API;
           else apiUrl = GENDER_API;
         }
 
@@ -162,6 +176,8 @@ function App() {
               ? 'Analyzed using Keras / PyTorch Backend' 
               : modelType === 'flower'
               ? 'Analyzed using PyTorch/EfficientNet (Flowers)'
+              : modelType === 'hand'
+              ? 'Analyzed using MediaPipe Hands'
               : 'Analyzed using PyTorch + ResNet18 (Gender)'
           });
         }
@@ -246,25 +262,32 @@ function App() {
         </div>
 
         <div className="status-bar">
-          <div className={`status-item ${modelStatus.gender === 'online' ? 'online' : 'offline'}`}>
+          <div className={`status-item ${modelStatus?.gender === 'online' ? 'online' : 'offline'}`}>
             <span className="status-dot"></span>
-            Gender AI: {modelStatus.gender === 'online' ? 'ONLINE' : 'OFFLINE'}
+            Gender AI: {modelStatus?.gender === 'online' ? 'ONLINE' : 'OFFLINE'}
             <small style={{ opacity: 0.5, marginLeft: '8px', fontSize: '0.7em' }}>
               ({(import.meta.env.VITE_GENDER_API_URL || 'localhost').includes('render.com') ? 'Cloud' : 'Local'})
             </small>
           </div>
-          <div className={`status-item ${modelStatus.animal === 'online' ? 'online' : 'offline'}`}>
+          <div className={`status-item ${modelStatus?.animal === 'online' ? 'online' : 'offline'}`}>
             <span className="status-dot"></span>
-            Animal AI: {modelStatus.animal === 'online' ? 'ONLINE' : 'OFFLINE'}
+            Animal AI: {modelStatus?.animal === 'online' ? 'ONLINE' : 'OFFLINE'}
             <small style={{ opacity: 0.5, marginLeft: '8px', fontSize: '0.7em' }}>
               ({(import.meta.env.VITE_ANIMAL_API_URL || 'localhost').includes('render.com') ? 'Cloud' : 'Local'})
             </small>
           </div>
-          <div className={`status-item ${modelStatus.flower === 'online' ? 'online' : 'offline'}`}>
+          <div className={`status-item ${modelStatus?.flower === 'online' ? 'online' : 'offline'}`}>
             <span className="status-dot"></span>
-            Flower AI: {modelStatus.flower === 'online' ? 'ONLINE' : 'OFFLINE'}
+            Flower AI: {modelStatus?.flower === 'online' ? 'ONLINE' : 'OFFLINE'}
             <small style={{ opacity: 0.5, marginLeft: '8px', fontSize: '0.7em' }}>
               ({(import.meta.env.VITE_FLOWER_API_URL || 'localhost').includes('render.com') ? 'Cloud' : 'Local'})
+            </small>
+          </div>
+          <div className={`status-item ${modelStatus?.hand === 'online' ? 'online' : 'offline'}`}>
+            <span className="status-dot"></span>
+            Hand AI: {modelStatus?.hand === 'online' ? 'ONLINE' : 'OFFLINE'}
+            <small style={{ opacity: 0.5, marginLeft: '8px', fontSize: '0.7em' }}>
+              ({(import.meta.env.VITE_HAND_API_URL || 'localhost').includes('render.com') ? 'Cloud' : 'Local'})
             </small>
           </div>
         </div>

@@ -13,15 +13,27 @@ app.use(cors());
 app.use(express.json());
 
 // 1. Health Check
-app.get('/', (req, res) => {
-    res.json({ 
-        status: 'API Gateway is Online', 
-        endpoints: {
-            gender: '/api/gender/predict',
-            animal: '/api/animal/predict',
-            flower: '/api/flower/predict'
+app.get('/', async (req, res) => {
+    const endpoints = {
+        gender: process.env.GENDER_API_URL || 'http://localhost:8000',
+        animal: process.env.ANIMAL_API_URL || 'http://localhost:8001',
+        flower: process.env.FLOWER_API_URL || 'http://localhost:8002',
+        hand: process.env.HAND_API_URL || 'http://localhost:8003'
+    };
+
+    const status = { gateway: 'online', services: {} };
+
+    // Check each service
+    for (const [name, url] of Object.entries(endpoints)) {
+        try {
+            await axios.get(`${url}/`, { timeout: 1000 });
+            status.services[name] = 'online';
+        } catch (err) {
+            status.services[name] = 'offline';
         }
-    });
+    }
+
+    res.json(status);
 });
 
 // 2. Gender AI Proxy
@@ -87,6 +99,28 @@ app.post('/api/flower/predict', upload.single('file'), async (req, res) => {
     } catch (error) {
         console.error('Flower Proxy Error:', error.message);
         res.status(500).json({ error: 'Flower AI Service unreachable', details: error.message });
+    }
+});
+
+// 5. Hand AI Proxy
+app.post('/api/hand/predict', upload.single('file'), async (req, res) => {
+    try {
+        const HAND_API = process.env.HAND_API_URL || 'http://localhost:8003';
+        
+        const form = new FormData();
+        form.append('file', req.file.buffer, {
+            filename: req.file.originalname,
+            contentType: req.file.mimetype,
+        });
+
+        const response = await axios.post(`${HAND_API}/predict`, form, {
+            headers: { ...form.getHeaders() }
+        });
+
+        res.json(response.data);
+    } catch (error) {
+        console.error('Hand Proxy Error:', error.message);
+        res.status(500).json({ error: 'Hand AI Service unreachable', details: error.message });
     }
 });
 
