@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error-container": "#ffdad6",
+                    "inverse-on-surface": "#233143",
+                    "primary": "#c8c3df",
+                    "on-surface": "#d4e4fa",
+                    "on-tertiary": "#5e0053",
+                    "on-primary-fixed": "#1b192e",
+                    "on-secondary-container": "#006a70",
+                    "surface-container-low": "#0d1c2d",
+                    "secondary-fixed": "#74f5ff",
+                    "error": "#ffb4ab",
+                    "on-tertiary-container": "#df00c8",
+                    "primary-container": "#0d0b1f",
+                    "on-tertiary-fixed": "#3a0033",
+                    "on-surface-variant": "#c9c5cd",
+                    "on-secondary-fixed": "#002022",
+                    "on-primary-container": "#7c7891",
+                    "on-secondary": "#00363a",
+                    "inverse-primary": "#5f5c74",
+                    "secondary-container": "#00f1fe",
+                    "background": "#051424",
+                    "tertiary-container": "#22001d",
+                    "surface-container": "#122131",
+                    "surface-container-high": "#1c2b3c",
+                    "error-container": "#93000a",
+                    "secondary": "#ddfcff",
+                    "on-primary-fixed-variant": "#47445b",
+                    "surface-variant": "#273647",
+                    "outline": "#928f97",
+                    "on-background": "#d4e4fa",
+                    "on-secondary-fixed-variant": "#004f54",
+                    "primary-fixed": "#e4dffc",
+                    "surface-container-highest": "#273647",
+                    "inverse-surface": "#d4e4fa",
+                    "surface-dim": "#051424",
+                    "primary-fixed-dim": "#c8c3df",
+                    "secondary-fixed-dim": "#00dbe7",
+                    "tertiary-fixed-dim": "#fface8",
+                    "tertiary": "#fface8",
+                    "surface-bright": "#2c3a4c",
+                    "surface-tint": "#c8c3df",
+                    "on-error": "#690005",
+                    "outline-variant": "#47464c",
+                    "tertiary-fixed": "#ffd7f0",
+                    "on-tertiary-fixed-variant": "#840076",
+                    "on-primary": "#302e44",
+                    "surface": "#051424",
+                    "surface-container-lowest": "#010f1f"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "sm": "12px",
+                    "base": "8px",
+                    "md": "24px",
+                    "margin": "24px",
+                    "lg": "40px",
+                    "xs": "4px",
+                    "xl": "64px",
+                    "gutter": "16px"
+            },
+            "fontFamily": {
+                    "label-md": ["Space Grotesk"],
+                    "headline-lg": ["Space Grotesk"],
+                    "body-md": ["Inter"],
+                    "headline-xl": ["Space Grotesk"],
+                    "body-lg": ["Inter"],
+                    "label-sm": ["Space Grotesk"],
+                    "headline-md": ["Space Grotesk"]
+            },
+            "fontSize": {
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-xl": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.08em", "fontWeight": "500"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(13, 11, 31, 0.4);
+            backdrop-filter: blur(40px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .scan-line {
+            background: linear-gradient(to bottom, transparent, rgba(0, 241, 254, 0.2), transparent);
+            animation: scan 3s ease-in-out infinite;
+        }
+        @keyframes scan {
+            0%, 100% { transform: translateY(-100%); }
+            50% { transform: translateY(400%); }
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen relative overflow-x-hidden flex flex-col">
+<!-- Background Gradient Only (Grid Removed) -->
+<div class="fixed top-[-20%] left-[-10%] w-[60%] h-[60%] bg-secondary-container/5 blur-[160px] rounded-full pointer-events-none"></div>
+<div class="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-tertiary/5 blur-[120px] rounded-full pointer-events-none"></div>
+<!-- Simplified Navigation -->
+<nav class="fixed top-0 w-full z-50 flex justify-between items-center px-10 h-20">
+<div class="flex items-center gap-2">
+<span class="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent font-['Space_Grotesk'] tracking-tight">AuraSense</span>
+</div>
+<div class="hidden md:flex items-center gap-10">
+<a class="text-on-surface font-['Space_Grotesk'] text-xs tracking-widest uppercase hover:text-cyan-400 transition-colors" href="#">Scanner</a>
+<a class="text-slate-500 font-['Space_Grotesk'] text-xs tracking-widest uppercase hover:text-cyan-400 transition-colors" href="#">Vault</a>
+<a class="text-slate-500 font-['Space_Grotesk'] text-xs tracking-widest uppercase hover:text-cyan-400 transition-colors" href="#">Analytics</a>
+</div>
+<div class="flex items-center gap-6">
+<button class="text-slate-500 hover:text-cyan-400 transition-colors">
+<span class="material-symbols-outlined text-xl" data-icon="settings">settings</span>
+</button>
+<div class="w-10 h-10 rounded-full border border-white/5 overflow-hidden ring-2 ring-cyan-400/20">
+<img alt="User Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCp9Xt35K0c8Ify5sYkKWnEULZubdgakoVfBXe09iXmI86ZhSsi48krSvqikJ2UK3fpI3LWR3mC611vG-65P3s5iXDHmleg7jYQQtqpk1ReOKPFT2NB5RC4cDKj-oqQfywxcSryjdJX1IsOQ-S2MK1h6KpfpS-k2knJLlUn7r4DUJddMZNBCmQo8QOfFXfed4DCBS8F0g3tMwPA8c9BWwuddRAOWvOqw5B_asAQ8ttoBmvnC9AfTtQKXp_WJXKM3PAvCIV64THncioN"/>
+</div>
+</div>
+</nav>
+<!-- Main Focused Content -->
+<main class="flex-1 flex flex-col items-center justify-center px-6 pt-32 pb-24 relative z-10">
+<div class="w-full max-w-4xl flex flex-col items-center">
+<!-- Minimal Header -->
+<header class="text-center mb-16">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-400 mb-6">
+<span class="material-symbols-outlined text-xs" data-icon="lock_open">lock_open</span>
+<span class="text-[10px] font-medium tracking-[0.2em] uppercase">Private Neural Instance</span>
+</div>
+<h1 class="font-headline-xl text-5xl md:text-6xl text-white mb-6">Initialize <span class="text-cyan-400">Scan</span></h1>
+<p class="font-body-lg text-slate-400 max-w-xl mx-auto leading-relaxed">
+                Secure biometric processing for decentralized identity verification. Your data is encrypted locally and never stored.
+            </p>
+</header>
+<!-- Centered Main Action Area -->
+<div class="w-full grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+<!-- Left Side: Integrated Requirements (Subtle) -->
+<div class="hidden md:flex md:col-span-3 flex-col gap-8 pt-12">
+<div class="opacity-60 hover:opacity-100 transition-opacity">
+<p class="text-[10px] font-bold text-cyan-400 tracking-widest uppercase mb-4">Integrity</p>
+<ul class="space-y-4">
+<li class="flex items-center gap-3 text-xs text-slate-400">
+<span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+                            Optimal Lighting
+                        </li>
+<li class="flex items-center gap-3 text-xs text-slate-400">
+<span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+                            Sharp Focus
+                        </li>
+<li class="flex items-center gap-3 text-xs text-slate-400">
+<span class="w-1.5 h-1.5 rounded-full bg-white/20"></span>
+                            Full Edge Detection
+                        </li>
+</ul>
+</div>
+</div>
+<!-- Center: The Upload Card -->
+<div class="md:col-span-6">
+<div class="glass-panel rounded-3xl p-4 md:p-8 relative group">
+<div class="absolute inset-0 scan-line rounded-3xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+<div class="border-2 border-dashed border-white/5 rounded-2xl bg-white/[0.02] hover:bg-white/[0.04] transition-all flex flex-col items-center justify-center py-20 px-6 cursor-pointer group-hover:border-cyan-400/20">
+<div class="w-16 h-16 rounded-2xl bg-cyan-400/10 flex items-center justify-center mb-8 ring-1 ring-cyan-400/20 group-hover:ring-cyan-400/40 transition-all">
+<span class="material-symbols-outlined text-cyan-400 text-3xl" data-icon="upload_file">upload_file</span>
+</div>
+<h3 class="text-white font-medium text-lg mb-2">Secure Upload</h3>
+<p class="text-slate-500 text-sm mb-10 text-center">Drag and drop document or use device camera</p>
+<div class="flex flex-col sm:flex-row gap-4 w-full px-4">
+<button class="flex-1 py-3 px-6 bg-white text-background rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-cyan-100 transition-all">
+                                Select File
+                            </button>
+<button class="flex-1 py-3 px-6 border border-white/10 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-white/5 transition-all">
+                                Camera
+                            </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Side: Integrated Readiness (Subtle) -->
+<div class="md:col-span-3 pt-12">
+<div class="opacity-60 hover:opacity-100 transition-opacity">
+<p class="text-[10px] font-bold text-tertiary tracking-widest uppercase mb-4">Neural State</p>
+<div class="flex justify-between items-center mb-2">
+<span class="text-xs text-slate-400">Ready</span>
+<span class="text-xs text-white font-bold">88%</span>
+</div>
+<div class="h-1 bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-tertiary w-[88%] shadow-[0_0_8px_#fface8]"></div>
+</div>
+<p class="mt-4 text-[10px] text-slate-500 italic leading-relaxed">
+                        Optimized for international biometric standards.
+                    </p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Minimal Footer Metadata -->
+<footer class="w-full py-8 px-10 flex justify-between items-center text-[10px] text-slate-600 tracking-widest uppercase">
+<div>AES-256 Enabled</div>
+<div class="flex gap-8">
+<a class="hover:text-cyan-400 transition-colors" href="#">Privacy Policy</a>
+<a class="hover:text-cyan-400 transition-colors" href="#">Support</a>
+</div>
+</footer>
+<!-- Floating Action Indicator (Contextual) -->
+<div class="fixed bottom-10 right-10 z-50">
+<button class="w-12 h-12 bg-white/5 backdrop-blur-md text-slate-400 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/10 hover:text-white transition-all group">
+<span class="material-symbols-outlined text-xl group-hover:rotate-12 transition-transform" data-icon="help_outline">help_outline</span>
+</button>
+</div>
+</body></html>

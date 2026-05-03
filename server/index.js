@@ -39,16 +39,24 @@ app.get('/', async (req, res) => {
 // 2. Gender AI Proxy
 app.post('/api/gender/predict', upload.single('file'), async (req, res) => {
     try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+        
         const GENDER_API = process.env.GENDER_API_URL || 'http://localhost:8000';
         
         const form = new FormData();
         form.append('file', req.file.buffer, {
             filename: req.file.originalname,
             contentType: req.file.mimetype,
+            knownLength: req.file.size
         });
 
         const response = await axios.post(`${GENDER_API}/predict`, form, {
-            headers: { ...form.getHeaders() }
+            headers: { 
+                ...form.getHeaders(),
+                'Content-Length': form.getLengthSync()
+            }
         });
 
         res.json(response.data);
@@ -61,16 +69,24 @@ app.post('/api/gender/predict', upload.single('file'), async (req, res) => {
 // 3. Animal AI Proxy
 app.post('/api/animal/predict', upload.single('file'), async (req, res) => {
     try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+        
         const ANIMAL_API = process.env.ANIMAL_API_URL || 'http://localhost:8001';
         
         const form = new FormData();
         form.append('file', req.file.buffer, {
             filename: req.file.originalname,
             contentType: req.file.mimetype,
+            knownLength: req.file.size
         });
 
         const response = await axios.post(`${ANIMAL_API}/predict`, form, {
-            headers: { ...form.getHeaders() }
+            headers: { 
+                ...form.getHeaders(),
+                'Content-Length': form.getLengthSync()
+            }
         });
 
         res.json(response.data);
@@ -83,16 +99,24 @@ app.post('/api/animal/predict', upload.single('file'), async (req, res) => {
 // 4. Flower AI Proxy
 app.post('/api/flower/predict', upload.single('file'), async (req, res) => {
     try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+
         const FLOWER_API = process.env.FLOWER_API_URL || 'http://localhost:8002';
         
         const form = new FormData();
         form.append('file', req.file.buffer, {
             filename: req.file.originalname,
             contentType: req.file.mimetype,
+            knownLength: req.file.size
         });
 
         const response = await axios.post(`${FLOWER_API}/predict`, form, {
-            headers: { ...form.getHeaders() }
+            headers: { 
+                ...form.getHeaders(),
+                'Content-Length': form.getLengthSync()
+            }
         });
 
         res.json(response.data);
@@ -105,16 +129,24 @@ app.post('/api/flower/predict', upload.single('file'), async (req, res) => {
 // 5. Hand AI Proxy
 app.post('/api/hand/predict', upload.single('file'), async (req, res) => {
     try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+
         const HAND_API = process.env.HAND_API_URL || 'http://localhost:8003';
         
         const form = new FormData();
         form.append('file', req.file.buffer, {
             filename: req.file.originalname,
             contentType: req.file.mimetype,
+            knownLength: req.file.size
         });
 
         const response = await axios.post(`${HAND_API}/predict`, form, {
-            headers: { ...form.getHeaders() }
+            headers: { 
+                ...form.getHeaders(),
+                'Content-Length': form.getLengthSync()
+            }
         });
 
         res.json(response.data);

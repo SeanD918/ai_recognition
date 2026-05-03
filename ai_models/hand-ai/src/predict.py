@@ -95,6 +95,37 @@ class HandDetector:
             prediction = CLASSES[class_idx] if class_idx < len(CLASSES) else str(class_idx)
             raw_scores = {CLASSES[i]: float(score[i]) for i in range(min(len(CLASSES), len(score)))}
             
+            # --- Heuristic Disambiguation for C, P, F ---
+            # If the Keras model predicts C, P, or F, we double-check the precise finger positions 
+            # using MediaPipe landmarks to fix common confusions.
+            if prediction in ['C', 'P', 'F'] and self.has_mediapipe:
+                image_rgb = preprocess_image(image_path)
+                if image_rgb is not None:
+                    mp_results = self.hands.process(image_rgb)
+                    if mp_results.multi_hand_landmarks:
+                        lm = mp_results.multi_hand_landmarks[0].landmark
+                        
+                        # Distance between thumb tip(4) and index tip(8)
+                        thumb_index_dist = np.sqrt((lm[4].x - lm[8].x)**2 + (lm[4].y - lm[8].y)**2)
+                        
+                        # Are middle, ring, pinky extended? (tip y < mcp y)
+                        middle_extended = lm[12].y < lm[9].y
+                        ring_extended = lm[16].y < lm[13].y
+                        pinky_extended = lm[20].y < lm[17].y
+                        
+                        # Is middle finger pointing down? (tip y > mcp y)
+                        middle_down = lm[12].y > lm[9].y
+                        
+                        if thumb_index_dist < 0.08 and middle_extended and ring_extended and pinky_extended:
+                            # Thumb and index form a circle, other fingers extended
+                            prediction = 'F'
+                        elif middle_down and (not ring_extended):
+                            # Middle finger pointing down, ring not extended
+                            prediction = 'P'
+                        elif thumb_index_dist > 0.1 and (not middle_extended):
+                            # Thumb and index open, fingers curled
+                            prediction = 'C'
+
             return prediction, confidence, raw_scores
 
         # Otherwise use mediapipe for landmarks
