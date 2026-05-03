@@ -1,7 +1,8 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Camera as CameraIcon, XCircle, Plus, Trash2 } from 'lucide-react';
 
-const HAND_API = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const isProd = import.meta.env.PROD;
+const HAND_API = import.meta.env.VITE_GATEWAY_URL || import.meta.env.VITE_API_URL || (isProd ? 'https://ai-recognition-gateway.onrender.com' : 'http://localhost:3000');
 const PREDICT_INTERVAL_MS = 1000; // Faster interval for responsive auto-add
 const SEND_SIZE = 224;            // Match model input size
 

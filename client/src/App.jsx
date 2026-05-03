@@ -17,12 +17,13 @@ function App() {
   /* ── API Health Check ───────────────────────────────────────── */
   useEffect(() => {
     async function checkHealth() {
-      const USE_GATEWAY  = import.meta.env.VITE_USE_GATEWAY === 'true';
-      const GATEWAY_URL  = (import.meta.env.VITE_GATEWAY_URL  || 'http://localhost:3000').replace(/\/$/, '');
-      const GENDER_API   = (import.meta.env.VITE_GENDER_API_URL || 'http://localhost:8000').replace(/\/$/, '');
-      const ANIMAL_API   = (import.meta.env.VITE_ANIMAL_API_URL || 'http://localhost:8001').replace(/\/$/, '');
-      const FLOWER_API   = (import.meta.env.VITE_FLOWER_API_URL || 'http://localhost:8002').replace(/\/$/, '');
-      const HAND_API     = (import.meta.env.VITE_HAND_API_URL   || 'http://localhost:8003').replace(/\/$/, '');
+      const isProd = import.meta.env.PROD;
+      const USE_GATEWAY  = import.meta.env.VITE_USE_GATEWAY ? import.meta.env.VITE_USE_GATEWAY === 'true' : isProd;
+      const GATEWAY_URL  = (import.meta.env.VITE_GATEWAY_URL  || (isProd ? 'https://ai-recognition-gateway.onrender.com' : 'http://localhost:3000')).replace(/\/$/, '');
+      const GENDER_API   = (import.meta.env.VITE_GENDER_API_URL || (isProd ? 'https://gender-ai-backend.onrender.com' : 'http://localhost:8000')).replace(/\/$/, '');
+      const ANIMAL_API   = (import.meta.env.VITE_ANIMAL_API_URL || (isProd ? 'https://animal-ai-backend.onrender.com' : 'http://localhost:8001')).replace(/\/$/, '');
+      const FLOWER_API   = (import.meta.env.VITE_FLOWER_API_URL || (isProd ? 'https://flower-ai-backend.onrender.com' : 'http://localhost:8002')).replace(/\/$/, '');
+      const HAND_API     = (import.meta.env.VITE_HAND_API_URL   || (isProd ? 'https://hand-ai-backend.onrender.com' : 'http://localhost:8003')).replace(/\/$/, '');
       try {
         if (USE_GATEWAY) {
           const res = await fetch(`${GATEWAY_URL}/`, { method:'GET' });
@@ -59,12 +60,13 @@ function App() {
     abortControllerRef.current?.abort();
     setIsAnalyzing(true); setResults(null);
     try {
-      const USE_GATEWAY = import.meta.env.VITE_USE_GATEWAY === 'true';
-      const GATEWAY_URL = (import.meta.env.VITE_GATEWAY_URL  || 'http://localhost:3000').replace(/\/$/, '');
-      const GENDER_API  = (import.meta.env.VITE_GENDER_API_URL || 'http://localhost:8000').replace(/\/$/, '');
-      const ANIMAL_API  = (import.meta.env.VITE_ANIMAL_API_URL || 'http://localhost:8001').replace(/\/$/, '');
-      const FLOWER_API  = (import.meta.env.VITE_FLOWER_API_URL || 'http://localhost:8002').replace(/\/$/, '');
-      const HAND_API    = (import.meta.env.VITE_HAND_API_URL   || 'http://localhost:8003').replace(/\/$/, '');
+      const isProd = import.meta.env.PROD;
+      const USE_GATEWAY  = import.meta.env.VITE_USE_GATEWAY ? import.meta.env.VITE_USE_GATEWAY === 'true' : isProd;
+      const GATEWAY_URL  = (import.meta.env.VITE_GATEWAY_URL  || (isProd ? 'https://ai-recognition-gateway.onrender.com' : 'http://localhost:3000')).replace(/\/$/, '');
+      const GENDER_API   = (import.meta.env.VITE_GENDER_API_URL || (isProd ? 'https://gender-ai-backend.onrender.com' : 'http://localhost:8000')).replace(/\/$/, '');
+      const ANIMAL_API   = (import.meta.env.VITE_ANIMAL_API_URL || (isProd ? 'https://animal-ai-backend.onrender.com' : 'http://localhost:8001')).replace(/\/$/, '');
+      const FLOWER_API   = (import.meta.env.VITE_FLOWER_API_URL || (isProd ? 'https://flower-ai-backend.onrender.com' : 'http://localhost:8002')).replace(/\/$/, '');
+      const HAND_API     = (import.meta.env.VITE_HAND_API_URL   || (isProd ? 'https://hand-ai-backend.onrender.com' : 'http://localhost:8003')).replace(/\/$/, '');
 
       let apiUrl = USE_GATEWAY
         ? `${GATEWAY_URL}/api/${modelType}`
