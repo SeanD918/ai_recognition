@@ -18,7 +18,7 @@ app.get('/', async (req, res) => {
         gender: process.env.GENDER_API_URL || 'http://localhost:8000',
         animal: process.env.ANIMAL_API_URL || 'http://localhost:8001',
         flower: process.env.FLOWER_API_URL || 'http://localhost:8002',
-        hand: process.env.HAND_API_URL || 'http://localhost:8003'
+        hand: process.env.HAND_API_URL || 'http://localhost:10003'
     };
 
     const status = { gateway: 'online', services: {} };
@@ -133,7 +133,7 @@ app.post('/api/hand/predict', upload.single('file'), async (req, res) => {
             return res.status(400).json({ error: 'No file uploaded' });
         }
 
-        const HAND_API = process.env.HAND_API_URL || 'http://localhost:8003';
+        const HAND_API = process.env.HAND_API_URL || 'http://localhost:10003';
         
         const form = new FormData();
         form.append('file', req.file.buffer, {

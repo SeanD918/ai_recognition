@@ -23,7 +23,7 @@ function App() {
       const GENDER_API   = (import.meta.env.VITE_GENDER_API_URL || (isProd ? 'https://gender-ai-backend.onrender.com' : 'http://localhost:8000')).replace(/\/$/, '');
       const ANIMAL_API   = (import.meta.env.VITE_ANIMAL_API_URL || (isProd ? 'https://animal-ai-backend.onrender.com' : 'http://localhost:8001')).replace(/\/$/, '');
       const FLOWER_API   = (import.meta.env.VITE_FLOWER_API_URL || (isProd ? 'https://flower-ai-backend.onrender.com' : 'http://localhost:8002')).replace(/\/$/, '');
-      const HAND_API     = (import.meta.env.VITE_HAND_API_URL   || (isProd ? 'https://hand-ai-backend.onrender.com' : 'http://localhost:8003')).replace(/\/$/, '');
+      const HAND_API     = (import.meta.env.VITE_HAND_API_URL   || (isProd ? 'https://hand-ai-backend.onrender.com' : 'http://localhost:10003')).replace(/\/$/, '');
       try {
         if (USE_GATEWAY) {
           const res = await fetch(`${GATEWAY_URL}/`, { method:'GET' });
@@ -66,7 +66,7 @@ function App() {
       const GENDER_API   = (import.meta.env.VITE_GENDER_API_URL || (isProd ? 'https://gender-ai-backend.onrender.com' : 'http://localhost:8000')).replace(/\/$/, '');
       const ANIMAL_API   = (import.meta.env.VITE_ANIMAL_API_URL || (isProd ? 'https://animal-ai-backend.onrender.com' : 'http://localhost:8001')).replace(/\/$/, '');
       const FLOWER_API   = (import.meta.env.VITE_FLOWER_API_URL || (isProd ? 'https://flower-ai-backend.onrender.com' : 'http://localhost:8002')).replace(/\/$/, '');
-      const HAND_API     = (import.meta.env.VITE_HAND_API_URL   || (isProd ? 'https://hand-ai-backend.onrender.com' : 'http://localhost:8003')).replace(/\/$/, '');
+      const HAND_API     = (import.meta.env.VITE_HAND_API_URL   || (isProd ? 'https://hand-ai-backend.onrender.com' : 'http://localhost:10003')).replace(/\/$/, '');
 
       let apiUrl = USE_GATEWAY
         ? `${GATEWAY_URL}/api/${modelType}`
