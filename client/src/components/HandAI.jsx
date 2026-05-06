@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Camera as CameraIcon, XCircle, Plus, Trash2 } from 'lucide-react';
 
 const isProd = import.meta.env.PROD;
-const HAND_API = import.meta.env.VITE_GATEWAY_URL || import.meta.env.VITE_API_URL || (isProd ? 'https://ai-recognition-gateway.onrender.com' : 'http://localhost:3000');
+const HAND_API = import.meta.env.VITE_HAND_API_URL || (isProd ? 'https://hand-ai-backend.onrender.com' : 'http://localhost:8003');
 const PREDICT_INTERVAL_MS = 1000; // Faster interval for responsive auto-add
 const SEND_SIZE = 224;            // Match model input size
 
@@ -190,7 +190,7 @@ const HandAI = ({ onBack }) => {
       try {
         const form = new FormData();
         form.append('file', blob, 'frame.jpg');
-        const res = await fetch(`${HAND_API}/api/hand/predict`, {
+        const res = await fetch(`${HAND_API}/predict`, {
           method: 'POST',
           body: form,
         });
