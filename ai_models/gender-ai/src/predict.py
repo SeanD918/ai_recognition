@@ -65,7 +65,7 @@ def is_human(image_path):
         conf, idx = torch.max(prob, 0)
         
         is_animal_id = idx.item() < 398
-        if is_animal_id and conf.item() > 0.05:
+        if is_animal_id and conf.item() > 0.35:
             print(f"Animal detected in {image_path} (ID: {idx.item()}, Conf: {conf.item():.4f}). Rejecting as human.")
             return False
     except Exception as e:
@@ -86,18 +86,18 @@ def is_human(image_path):
             print(f"Cat face detected locally in {image_path}. Rejecting as human.")
             return False
             
-    # 1. Try frontal face (alt2) - most accurate, use minNeighbors=5 to reduce false positives
-    faces = face_cascade.detectMultiScale(gray, 1.1, 5)
+    # 1. Try frontal face (alt2) - most accurate, use minNeighbors=3 to allow various angles/lighting
+    faces = face_cascade.detectMultiScale(gray, 1.1, 3)
     if len(faces) > 0:
         return True
         
-    # 2. Try default frontal face - robust/sensitive, use minNeighbors=5 to avoid background noise/animals
-    faces_default = default_cascade.detectMultiScale(gray, 1.1, 5)
+    # 2. Try default frontal face - robust/sensitive, use minNeighbors=3 to ensure all humans pass
+    faces_default = default_cascade.detectMultiScale(gray, 1.1, 3)
     if len(faces_default) > 0:
         return True
 
     # 3. Try profile face as backup
-    profiles = profile_cascade.detectMultiScale(gray, 1.1, 5)
+    profiles = profile_cascade.detectMultiScale(gray, 1.1, 3)
     return len(profiles) > 0
 
 def predict_image(image_path):
