@@ -141,7 +141,8 @@ class HandDetector:
 
         # Otherwise use mediapipe for landmarks
         if not self.has_mediapipe:
-            return "No ASL model loaded", 0.0, {"error": "Missing model and MediaPipe"}
+            err = getattr(self, 'load_error', 'Unknown Keras Error')
+            return "No ASL model loaded", 0.0, {"error": f"Model failed to load: {err}"}
 
         image_rgb = preprocess_image(image_path)
         if image_rgb is None:
