@@ -6,12 +6,14 @@ def is_hand(image_path):
     """
     try:
         import mediapipe as mp
-    except ImportError:
-        # If mediapipe is not installed, skip validation
-        return True, "Validation skipped (mediapipe not installed)"
+        mp_hands = mp.solutions.hands
+        hands = mp_hands.Hands(static_image_mode=True, max_num_hands=1, min_detection_confidence=0.5)
+    except Exception as e:
+        # If mediapipe is not installed or fails due to system libraries (OSError), skip validation
+        print(f"Validation skipped due to MediaPipe error: {e}")
+        return True, "Validation skipped (mediapipe error)"
 
-    mp_hands = mp.solutions.hands
-    with mp_hands.Hands(static_image_mode=True, max_num_hands=1, min_detection_confidence=0.5) as hands:
+    with hands:
         image = cv2.imread(image_path)
         if image is None:
             return False, "Image not found"

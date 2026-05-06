@@ -78,6 +78,7 @@ class HandDetector:
                 print(f"Loaded custom Keras Hand AI model from {MODEL_KERAS_PATH}")
                 return
             except Exception as e:
+                self.load_error = str(e)
                 print(f"Error loading custom Keras model: {e}")
 
     def predict_image(self, image_path):
@@ -188,4 +189,4 @@ def get_backend_name():
         return "Keras/TensorFlow"
     elif detector.model_type == 'pytorch':
         return "PyTorch Hand Model"
-    return "No Model Loaded"
+    return f"No Model Loaded (Error: {getattr(detector, 'load_error', 'Unknown')})"

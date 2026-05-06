@@ -73,6 +73,9 @@ async def predict(file: UploadFile = File(...)):
 
     backend_name = get_backend_name()
     
+    if isinstance(info, dict) and "error" in info:
+        return {"error": info["error"]}
+    
     return {
         "prediction": str(count),
         "count": count,
