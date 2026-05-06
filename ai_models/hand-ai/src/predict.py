@@ -46,7 +46,6 @@ class HandDetector:
         self.custom_model = None
         self.model_type = None
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.load_custom_model()
 
     def load_custom_model(self):
         # Priority 1: PyTorch Model
@@ -177,6 +176,7 @@ def load_model_if_needed():
         detector.load_custom_model()
 
 def get_backend_name():
+    load_model_if_needed()
     if detector.model_type == 'keras':
         return "Keras/TensorFlow"
     elif detector.model_type == 'pytorch':
