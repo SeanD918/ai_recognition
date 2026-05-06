@@ -293,7 +293,7 @@ function App() {
 
       {/* ── Footer ───────────────────────────────────────────── */}
       <footer className="app-footer">
-        <span>AES-256 Enabled</span>
+        <span>developed by Iheb Rouini</span>
         <div className="footer-links">
           <a href="#">Privacy Policy</a>
           <a href="#">Support</a>
