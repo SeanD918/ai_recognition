@@ -73,12 +73,14 @@ class HandDetector:
             try:
                 import tensorflow as tf
                 
-                # Monkey patch tf.keras.layers.Dense to safely pop quantization_config
-                original_init = tf.keras.layers.Dense.__init__
-                def patched_init(self, *args, **kwargs):
-                    kwargs.pop('quantization_config', None)
-                    original_init(self, *args, **kwargs)
-                tf.keras.layers.Dense.__init__ = patched_init
+                # Monkey patch tf.keras.layers.Dense to safely pop quantization_config dynamically
+                if not hasattr(tf.keras.layers.Dense.__init__, "_patched"):
+                    original_init = tf.keras.layers.Dense.__init__
+                    def patched_init(self, *args, **kwargs):
+                        kwargs.pop('quantization_config', None)
+                        return original_init(self, *args, **kwargs)
+                    patched_init._patched = True
+                    tf.keras.layers.Dense.__init__ = patched_init
                 
                 self.custom_model = tf.keras.models.load_model(MODEL_KERAS_PATH)
                 self.model_type = 'keras'

@@ -57,6 +57,16 @@ def load_model_if_needed():
     if not model and os.path.exists(MODEL_KERAS_PATH):
         try:
             import tensorflow as tf
+            
+            # Monkey patch tf.keras.layers.Dense to safely pop quantization_config dynamically
+            if not hasattr(tf.keras.layers.Dense.__init__, "_patched"):
+                original_init = tf.keras.layers.Dense.__init__
+                def patched_init(self, *args, **kwargs):
+                    kwargs.pop('quantization_config', None)
+                    return original_init(self, *args, **kwargs)
+                patched_init._patched = True
+                tf.keras.layers.Dense.__init__ = patched_init
+                
             model = tf.keras.models.load_model(MODEL_KERAS_PATH)
             model_type = 'keras'
             print(f"Loaded Keras animal model from {MODEL_KERAS_PATH}")

@@ -16,6 +16,7 @@ const HandAI = ({ onBack }) => {
   const handDetected  = useRef(false);
   const lastLandmarks = useRef(null);
   const currentGesture = useRef(null); // { letter, count, maxConfidence, imageSrc }
+  const lastValidPredRef = useRef('NOTHING');
 
   const [result,        setResult]        = useState('–');
   const [displayResult, setDisplayResult] = useState('–');
@@ -138,6 +139,7 @@ const HandAI = ({ onBack }) => {
     if (!handDetected.current) {
       setResult('NOTHING');
       setDisplayResult('–');
+      lastValidPredRef.current = 'NOTHING';
       return;
     }
 
@@ -206,6 +208,17 @@ const HandAI = ({ onBack }) => {
           
           if (conf !== null && conf < 60.0) {
             pred = 'NOTHING';
+          }
+
+          // If the hand is still detected but the prediction is NOTHING, 
+          // we retain the last valid prediction to prevent flickering.
+          if (pred === 'NOTHING' && handDetected.current && lastValidPredRef.current !== 'NOTHING') {
+            pred = lastValidPredRef.current;
+          }
+
+          // Remember the latest valid prediction
+          if (pred !== 'NOTHING') {
+            lastValidPredRef.current = pred;
           }
 
           setResult(pred);
