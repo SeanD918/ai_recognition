@@ -4,7 +4,6 @@ os.environ['OMP_NUM_THREADS'] = '1'
 os.environ['TF_NUM_INTRAOP_THREADS'] = '1'
 os.environ['TF_NUM_INTEROP_THREADS'] = '1'
 
-import torch
 import json
 import numpy as np
 from preprocess import preprocess_image
@@ -38,19 +37,26 @@ class HandDetector:
                 min_detection_confidence=0.5
             )
             self.has_mediapipe = True
-        except ImportError:
+        except Exception as e:
             self.hands = None
             self.has_mediapipe = False
-            print("MediaPipe not installed, fallback logic disabled.")
+            print(f"MediaPipe load error: {e}. Fallback logic disabled.")
             
         self.custom_model = None
         self.model_type = None
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        
+        # Lazy-load torch to keep startup memory under 50MB and prevent OOM on Render
+        try:
+            import torch
+            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        except Exception:
+            self.device = "cpu"
 
     def load_custom_model(self):
         # Priority 1: PyTorch Model
         if os.path.exists(MODEL_PTH_PATH):
             try:
+                import torch
                 from train import HandGestureModel, LABELS
                 self.labels = LABELS
                 self.custom_model = HandGestureModel(num_classes=len(self.labels))
@@ -147,6 +153,7 @@ class HandDetector:
 
         # If we have a PyTorch model, use it to predict with landmarks
         if self.model_type == 'pytorch':
+            import torch
             landmarks = []
             for lm in results.multi_hand_landmarks[0].landmark:
                 landmarks.extend([lm.x, lm.y, lm.z])
