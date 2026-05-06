@@ -73,13 +73,12 @@ class HandDetector:
             try:
                 import tensorflow as tf
                 
-                # Dynamic interceptor for Keras 2 / Keras 3 deserialization compatibility
-                class CustomDense(tf.keras.layers.Dense):
-                    def __init__(self, *args, **kwargs):
-                        kwargs.pop('quantization_config', None)
-                        super().__init__(*args, **kwargs)
-                
-                tf.keras.utils.get_custom_objects()['Dense'] = CustomDense
+                # Monkey patch tf.keras.layers.Dense to safely pop quantization_config
+                original_init = tf.keras.layers.Dense.__init__
+                def patched_init(self, *args, **kwargs):
+                    kwargs.pop('quantization_config', None)
+                    original_init(self, *args, **kwargs)
+                tf.keras.layers.Dense.__init__ = patched_init
                 
                 self.custom_model = tf.keras.models.load_model(MODEL_KERAS_PATH)
                 self.model_type = 'keras'
