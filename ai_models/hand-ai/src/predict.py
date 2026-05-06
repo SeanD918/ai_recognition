@@ -69,10 +69,18 @@ class HandDetector:
             except Exception as e:
                 print(f"Error loading custom PyTorch model: {e}")
 
-        # Priority 2: Keras Model
         if os.path.exists(MODEL_KERAS_PATH):
             try:
                 import tensorflow as tf
+                
+                # Dynamic interceptor for Keras 2 / Keras 3 deserialization compatibility
+                class CustomDense(tf.keras.layers.Dense):
+                    def __init__(self, *args, **kwargs):
+                        kwargs.pop('quantization_config', None)
+                        super().__init__(*args, **kwargs)
+                
+                tf.keras.utils.get_custom_objects()['Dense'] = CustomDense
+                
                 self.custom_model = tf.keras.models.load_model(MODEL_KERAS_PATH)
                 self.model_type = 'keras'
                 print(f"Loaded custom Keras Hand AI model from {MODEL_KERAS_PATH}")
