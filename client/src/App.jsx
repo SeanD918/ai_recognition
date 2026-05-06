@@ -12,7 +12,24 @@ function App() {
   const [results,     setResults]     = useState(null);
   const [modelType,   setModelType]   = useState('gender');
   const [modelStatus, setModelStatus] = useState({ animal:'checking', gender:'checking', flower:'checking', hand:'checking' });
+  const [customAlert, setCustomAlert] = useState(null);
   const abortControllerRef = useRef(null);
+
+  /* ── Global Alert Interceptor ───────────────────────────────── */
+  useEffect(() => {
+    const originalAlert = window.alert;
+    window.alert = (message) => {
+      const isError = /fail|error|not found|denied|invalid/i.test(message);
+      setCustomAlert({
+        title: isError ? 'SYSTEM ERROR' : 'SYSTEM ALERT',
+        message,
+        type: isError ? 'error' : 'info'
+      });
+    };
+    return () => {
+      window.alert = originalAlert;
+    };
+  }, []);
 
   /* ── API Health Check ───────────────────────────────────────── */
   useEffect(() => {
@@ -23,7 +40,7 @@ function App() {
       const GENDER_API   = (import.meta.env.VITE_GENDER_API_URL || (isProd ? 'https://gender-ai-backend.onrender.com' : 'http://localhost:8000')).replace(/\/$/, '');
       const ANIMAL_API   = (import.meta.env.VITE_ANIMAL_API_URL || (isProd ? 'https://animal-ai-backend.onrender.com' : 'http://localhost:8001')).replace(/\/$/, '');
       const FLOWER_API   = (import.meta.env.VITE_FLOWER_API_URL || (isProd ? 'https://flower-ai-backend.onrender.com' : 'http://localhost:8002')).replace(/\/$/, '');
-      const HAND_API     = (import.meta.env.VITE_HAND_API_URL   || (isProd ? 'https://hand-ai-backend.onrender.com' : 'http://localhost:10003')).replace(/\/$/, '');
+      const HAND_API     = (import.meta.env.VITE_HAND_API_URL   || (isProd ? 'https://hand-ai-backend.onrender.com' : 'http://localhost:8003')).replace(/\/$/, '');
       try {
         if (USE_GATEWAY) {
           const res = await fetch(`${GATEWAY_URL}/`, { method:'GET' });
@@ -66,7 +83,7 @@ function App() {
       const GENDER_API   = (import.meta.env.VITE_GENDER_API_URL || (isProd ? 'https://gender-ai-backend.onrender.com' : 'http://localhost:8000')).replace(/\/$/, '');
       const ANIMAL_API   = (import.meta.env.VITE_ANIMAL_API_URL || (isProd ? 'https://animal-ai-backend.onrender.com' : 'http://localhost:8001')).replace(/\/$/, '');
       const FLOWER_API   = (import.meta.env.VITE_FLOWER_API_URL || (isProd ? 'https://flower-ai-backend.onrender.com' : 'http://localhost:8002')).replace(/\/$/, '');
-      const HAND_API     = (import.meta.env.VITE_HAND_API_URL   || (isProd ? 'https://hand-ai-backend.onrender.com' : 'http://localhost:10003')).replace(/\/$/, '');
+      const HAND_API     = (import.meta.env.VITE_HAND_API_URL   || (isProd ? 'https://hand-ai-backend.onrender.com' : 'http://localhost:8003')).replace(/\/$/, '');
 
       let apiUrl = USE_GATEWAY
         ? `${GATEWAY_URL}/api/${modelType}`
@@ -282,6 +299,22 @@ function App() {
           <a href="#">Support</a>
         </div>
       </footer>
+
+      {customAlert && (
+        <div className="neon-alert-backdrop" onClick={() => setCustomAlert(null)}>
+          <div className={`neon-alert-card ${customAlert.type}`} onClick={(e) => e.stopPropagation()}>
+            <div className="neon-alert-glow" />
+            <div className="neon-alert-icon-wrap">
+              <AlertCircle size={32} />
+            </div>
+            <h3 className="neon-alert-title">{customAlert.title}</h3>
+            <p className="neon-alert-message">{customAlert.message}</p>
+            <button className="neon-alert-btn" onClick={() => setCustomAlert(null)}>
+              Acknowledge
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -6,4 +6,5 @@ python-multipart
 numpy
 --extra-index-url https://download.pytorch.org/whl/cpu
 torch
+torchvision
 tensorflow-cpu

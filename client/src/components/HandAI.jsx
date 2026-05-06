@@ -97,7 +97,11 @@ const HandAI = ({ onBack }) => {
       height: 480,
     });
 
-    camera.start().then(() => setIsReady(true));
+    camera.start()
+      .then(() => setIsReady(true))
+      .catch((err) => {
+        window.alert(`Failed to acquire camera feed: ${err.message || err}`);
+      });
     cameraRef.current = camera;
 
     return () => {
