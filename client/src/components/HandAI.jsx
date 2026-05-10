@@ -3,7 +3,7 @@ import { Camera as CameraIcon, XCircle, Plus, Trash2 } from 'lucide-react';
 
 const isProd = import.meta.env.PROD;
 const HAND_API = import.meta.env.VITE_HAND_API_URL || (isProd ? 'https://hand-ai-backend.onrender.com' : 'http://localhost:8003');
-const PREDICT_INTERVAL_MS = 1000; // Faster interval for responsive auto-add
+const PREDICT_INTERVAL_MS = 400;  // Faster interval for real-time responsive updates
 const SEND_SIZE = 224;            // Match model input size
 
 const HandAI = ({ onBack }) => {
@@ -230,7 +230,7 @@ const HandAI = ({ onBack }) => {
           setConfidence(data.confidence ?? null);
 
           // ── Gesture Tracking & Auto-Add Logic ───────────────────────
-          const MIN_STABLE_FRAMES = 3; // Must be held for 3 seconds
+          const MIN_STABLE_FRAMES = 2; // Requires sign to be held steady for just 0.8 seconds
 
           if (pred !== 'NOTHING' && pred !== '–') {
             if (currentGesture.current && currentGesture.current.letter === pred) {
@@ -268,7 +268,7 @@ const HandAI = ({ onBack }) => {
         isPredicting.current = false;
         setIsLoading(false);
       }
-    }, 'image/jpeg', 0.8);
+    }, 'image/jpeg', 0.6); // Reduced quality for lower network payload and latency
   }, []);
 
   useEffect(() => {
@@ -399,7 +399,7 @@ const HandAI = ({ onBack }) => {
 
       {/* Instructions */}
       <div className="hand-instructions">
-        <p>Show an ASL sign — hand skeleton tracks in real time, prediction updates every 1s.</p>
+        <p>Show an ASL sign — hand tracks in real time, prediction updates dynamically.</p>
       </div>
 
       {/* Sentence builder */}
