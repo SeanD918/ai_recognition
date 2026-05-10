@@ -5,6 +5,7 @@ const isProd = import.meta.env.PROD;
 const HAND_API = import.meta.env.VITE_HAND_API_URL || (isProd ? 'https://hand-ai-backend.onrender.com' : 'http://localhost:8003');
 const PREDICT_INTERVAL_MS = 400;  // Faster interval for real-time responsive updates
 const SEND_SIZE = 224;            // Match model input size
+const MIN_STABLE_FRAMES = 2;      // Requires sign to be held steady for just 0.8 seconds
 
 const HandAI = ({ onBack }) => {
   const videoRef      = useRef(null);
@@ -56,7 +57,7 @@ const HandAI = ({ onBack }) => {
 
     hands.setOptions({
       maxNumHands: 1,
-      modelComplexity: 1,
+      modelComplexity: 0, // Lite model for maximum performance & visual responsiveness
       minDetectionConfidence: 0.6,
       minTrackingConfidence: 0.5,
     });
@@ -135,10 +136,15 @@ const HandAI = ({ onBack }) => {
     const canvas  = captureRef.current;
     if (!video || !canvas || video.readyState < 2) return;
 
-    // Only run prediction if a hand is visible
+    // Handle case where hand is removed
     if (!handDetected.current) {
-      setResult('NOTHING');
-      setDisplayResult('–');
+      // If user was holding a gesture, commit it now that they dropped their hand.
+      if (currentGesture.current && currentGesture.current.count >= MIN_STABLE_FRAMES) {
+        commitGesture(currentGesture.current);
+      }
+      currentGesture.current = null;
+      
+      // Reset flicker-sustain state, but DO NOT clear visual state to keep last pred shown.
       lastValidPredRef.current = 'NOTHING';
       return;
     }
@@ -221,16 +227,18 @@ const HandAI = ({ onBack }) => {
             lastValidPredRef.current = pred;
           }
 
-          setResult(pred);
-          setDisplayResult(
-            pred === 'NOTHING' ? '–' :
-            pred === 'SPACE'   ? '␣' :
-            pred === 'DEL'     ? '⌫' : pred
-          );
-          setConfidence(data.confidence ?? null);
+          // Only update visual indicators if it's a real prediction (not NOTHING),
+          // so the UI retains the last valid letter display as requested.
+          if (pred !== 'NOTHING') {
+            setResult(pred);
+            setDisplayResult(
+              pred === 'SPACE' ? '␣' :
+              pred === 'DEL'   ? '⌫' : pred
+            );
+            setConfidence(data.confidence ?? null);
+          }
 
           // ── Gesture Tracking & Auto-Add Logic ───────────────────────
-          const MIN_STABLE_FRAMES = 2; // Requires sign to be held steady for just 0.8 seconds
 
           if (pred !== 'NOTHING' && pred !== '–') {
             if (currentGesture.current && currentGesture.current.letter === pred) {

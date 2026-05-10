@@ -91,20 +91,28 @@ class HandDetector:
                 print(f"Error loading custom Keras model: {e}")
 
     def predict_image(self, image_path):
-        # Strict validation: Only hand images allowed
-        from validator import is_hand
-        valid_hand, message = is_hand(image_path)
-        if not valid_hand:
-            print(f"Validation failed: {message}")
-            return f"Not a hand ({message})", 0.0, {}
+        import cv2
+        # 1. Direct Memory Load: Eliminates loading images multiple times from disk
+        img_bgr = cv2.imread(image_path)
+        if img_bgr is None:
+            return "Invalid image", 0.0, {}
 
-        # If we have a Keras model, use it for direct image prediction
+        # 2. Fast Singleton Validation: Uses our long-lived MediaPipe object instead of spawning fresh instances
+        mp_results = None
+        if self.has_mediapipe:
+            img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+            mp_results = self.hands.process(img_rgb)
+            if not mp_results.multi_hand_landmarks:
+                print("Fast Validation Alert: No hand found in frame.")
+                return "Not a hand (No hand detected)", 0.0, {}
+        
+        # 3. Highly-Optimized Keras Logic
         if self.model_type == 'keras':
-            import tensorflow as tf
-            img = tf.keras.preprocessing.image.load_img(image_path, target_size=(224, 224))
-            img_array = tf.keras.preprocessing.image.img_to_array(img)
-            img_array = np.expand_dims(img_array, 0)
-            img_array = img_array / 127.5 - 1.0 # Standard Keras normalization
+            # Efficient in-memory manipulation directly to Keras float tensor
+            img_resized = cv2.resize(img_bgr, (224, 224))
+            img_keras_rgb = cv2.cvtColor(img_resized, cv2.COLOR_BGR2RGB)
+            img_array = np.expand_dims(img_keras_rgb, 0).astype(np.float32)
+            img_array = img_array / 127.5 - 1.0 # Built-in model normalization
             
             predictions = self.custom_model(img_array, training=False)
             score = predictions[0].numpy()
@@ -115,58 +123,38 @@ class HandDetector:
             prediction = CLASSES[class_idx] if class_idx < len(CLASSES) else str(class_idx)
             raw_scores = {CLASSES[i]: float(score[i]) for i in range(min(len(CLASSES), len(score)))}
             
-            # --- Heuristic Disambiguation for C, P, F ---
-            # If the Keras model predicts C, P, or F, we double-check the precise finger positions 
-            # using MediaPipe landmarks to fix common confusions.
-            if prediction in ['C', 'P', 'F'] and self.has_mediapipe:
-                image_rgb = preprocess_image(image_path)
-                if image_rgb is not None:
-                    mp_results = self.hands.process(image_rgb)
-                    if mp_results.multi_hand_landmarks:
-                        lm = mp_results.multi_hand_landmarks[0].landmark
-                        
-                        # Distance between thumb tip(4) and index tip(8)
-                        thumb_index_dist = np.sqrt((lm[4].x - lm[8].x)**2 + (lm[4].y - lm[8].y)**2)
-                        
-                        # Are middle, ring, pinky extended? (tip y < mcp y)
-                        middle_extended = lm[12].y < lm[9].y
-                        ring_extended = lm[16].y < lm[13].y
-                        pinky_extended = lm[20].y < lm[17].y
-                        
-                        # Is middle finger pointing down? (tip y > mcp y)
-                        middle_down = lm[12].y > lm[9].y
-                        
-                        if thumb_index_dist < 0.08 and middle_extended and ring_extended and pinky_extended:
-                            # Thumb and index form a circle, other fingers extended
-                            prediction = 'F'
-                        elif middle_down and (not ring_extended):
-                            # Middle finger pointing down, ring not extended
-                            prediction = 'P'
-                        elif thumb_index_dist > 0.1 and (not middle_extended):
-                            # Thumb and index open, fingers curled
-                            prediction = 'C'
+            # --- MEMOIZED Heuristic Check for C, P, F ---
+            # Zero Cost: Reuses the EXACT results computed during the validation step!
+            if prediction in ['C', 'P', 'F'] and mp_results and mp_results.multi_hand_landmarks:
+                lm = mp_results.multi_hand_landmarks[0].landmark
+                
+                thumb_index_dist = np.sqrt((lm[4].x - lm[8].x)**2 + (lm[4].y - lm[8].y)**2)
+                middle_extended = lm[12].y < lm[9].y
+                ring_extended = lm[16].y < lm[13].y
+                pinky_extended = lm[20].y < lm[17].y
+                middle_down = lm[12].y > lm[9].y
+                
+                if thumb_index_dist < 0.08 and middle_extended and ring_extended and pinky_extended:
+                    prediction = 'F'
+                elif middle_down and (not ring_extended):
+                    prediction = 'P'
+                elif thumb_index_dist > 0.1 and (not middle_extended):
+                    prediction = 'C'
 
             return prediction, confidence, raw_scores
 
-        # Otherwise use mediapipe for landmarks
+        # 4. Optimized Fallback / PyTorch Landmark logic
         if not self.has_mediapipe:
-            err = getattr(self, 'load_error', 'Unknown Keras Error')
-            return "No ASL model loaded", 0.0, {"error": f"Model failed to load: {err}"}
+            err = getattr(self, 'load_error', 'Model failed during startup.')
+            return "No ASL model loaded", 0.0, {"error": err}
 
-        image_rgb = preprocess_image(image_path)
-        if image_rgb is None:
-            return "Invalid image", 0.0, {}
-        
-        results = self.hands.process(image_rgb)
-        
-        if not results.multi_hand_landmarks:
-            return "No hands detected", 0.0, {"error": "No hands detected"}
+        if not mp_results or not mp_results.multi_hand_landmarks:
+             return "No hands detected", 0.0, {"error": "No hands detected"}
 
-        # If we have a PyTorch model, use it to predict with landmarks
         if self.model_type == 'pytorch':
             import torch
             landmarks = []
-            for lm in results.multi_hand_landmarks[0].landmark:
+            for lm in mp_results.multi_hand_landmarks[0].landmark:
                 landmarks.extend([lm.x, lm.y, lm.z])
             
             with torch.no_grad():
