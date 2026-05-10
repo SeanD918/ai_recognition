@@ -277,7 +277,7 @@ const HandAI = ({ onBack }) => {
         setIsLoading(false);
       }
     }, 'image/jpeg', 0.6); // Reduced quality for lower network payload and latency
-  }, []);
+  }, [commitGesture]);
 
   useEffect(() => {
     if (!isReady) return;
