@@ -31,6 +31,47 @@ const HandAI = ({ onBack }) => {
   const [autoAdded,     setAutoAdded]     = useState(false); // flash indicator
   const [lastSnapshot,  setLastSnapshot]  = useState(null);  // { image: dataURL, letter: string }
 
+  // ── Suppress MediaPipe WASM console warnings ──────────────────────────────
+  useEffect(() => {
+    const originalLog = console.log;
+    const originalWarn = console.warn;
+    const originalInfo = console.info;
+
+    const filterFn = (args) => {
+      if (args.length > 0 && typeof args[0] === 'string') {
+        const msg = args[0];
+        return (
+          msg.includes('gl_context') ||
+          msg.includes('OpenGL') ||
+          msg.includes('WebGL') ||
+          msg.includes('hands_solution_simd_wasm_bin')
+        );
+      }
+      return false;
+    };
+
+    console.log = (...args) => {
+      if (filterFn(args)) return;
+      originalLog.apply(console, args);
+    };
+
+    console.warn = (...args) => {
+      if (filterFn(args)) return;
+      originalWarn.apply(console, args);
+    };
+
+    console.info = (...args) => {
+      if (filterFn(args)) return;
+      originalInfo.apply(console, args);
+    };
+
+    return () => {
+      console.log = originalLog;
+      console.warn = originalWarn;
+      console.info = originalInfo;
+    };
+  }, []);
+
   // ── Check MediaPipe is loaded ─────────────────────────────────────────────
   useEffect(() => {
     const check = setInterval(() => {
@@ -91,24 +132,46 @@ const HandAI = ({ onBack }) => {
       }
     });
 
+    let active = true;
+
     const camera = new Camera(video, {
       onFrame: async () => {
-        await hands.send({ image: video });
+        if (!active) return;
+        try {
+          if (video && video.readyState >= 2) {
+            await hands.send({ image: video });
+          }
+        } catch (err) {
+          console.warn("MediaPipe hands processing interrupted:", err);
+        }
       },
       width: 640,
       height: 480,
     });
 
     camera.start()
-      .then(() => setIsReady(true))
+      .then(() => {
+        if (active) setIsReady(true);
+      })
       .catch((err) => {
-        window.alert(`Failed to acquire camera feed: ${err.message || err}`);
+        if (active) {
+          window.alert(`Failed to acquire camera feed: ${err.message || err}`);
+        }
       });
     cameraRef.current = camera;
 
     return () => {
-      camera.stop();
-      hands.close();
+      active = false;
+      if (cameraRef.current) {
+        Promise.resolve(cameraRef.current.stop()).catch((e) =>
+          console.warn("Camera stop error:", e)
+        );
+      }
+      try {
+        hands.close();
+      } catch (e) {
+        console.warn("Hands close error:", e);
+      }
     };
   }, [mpReady]);
 

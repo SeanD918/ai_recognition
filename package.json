@@ -6,11 +6,13 @@
     "install-all": "npm install --prefix client && npm install --prefix server",
     "client": "npm run dev --prefix client",
     "server": "npm start --prefix server",
-    "gender-ai": "cd ai_models/gender-ai && python -m uvicorn app.api:app --host 0.0.0.0 --port 8000 --reload",
-    "animal-ai": "cd ai_models/animal-ai && python -m uvicorn app.api:app --host 0.0.0.0 --port 8001 --reload",
-    "flower-ai": "cd ai_models/flower-ai && python -m uvicorn app.api:app --host 0.0.0.0 --port 8002 --reload",
-    "hand-ai": "cd ai_models/hand-ai && python -m uvicorn app.api:app --host 0.0.0.0 --port 8003 --reload",
-    "dev": "npx concurrently \"npm run client\" \"npm run server\" \"npm run gender-ai\" \"npm run animal-ai\" \"npm run flower-ai\" \"npm run hand-ai\""
+    "gender-ai": "node run-python.js gender-ai",
+    "animal-ai": "node run-python.js animal-ai",
+    "flower-ai": "node run-python.js flower-ai",
+    "hand-ai": "node run-python.js hand-ai",
+    "unified-backend": "cd unified-backend && ..\\.venv\\Scripts\\python -m uvicorn main:app --host 0.0.0.0 --port 3000 --reload",
+    "dev": "npx concurrently \"npm run client\" \"npm run server\" \"npm run gender-ai\" \"npm run animal-ai\" \"npm run flower-ai\" \"npm run hand-ai\"",
+    "dev-unified": "npx concurrently \"npm run client\" \"npm run unified-backend\""
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
